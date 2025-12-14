@@ -2,7 +2,7 @@
 
 import { createProjectAction } from '@/actions/create-project';
 import { uploadFileFromBrowser } from '@/storage';
-import { CloudUpload } from 'lucide-react';
+import { CloudUpload, Sparkles } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -77,36 +77,66 @@ export default function HeroSection() {
   };
 
   return (
-    <main id="hero" className="bg-gradient-to-b from-background to-muted/60">
-      <section className="relative">
-        <div className="mx-auto flex min-h-[78vh] max-w-6xl flex-col items-center justify-center px-6 text-center">
-          <h1 className="text-balance text-4xl font-bricolage-grotesque leading-tight sm:text-5xl">
+    <main id="hero" className="relative overflow-hidden bg-[#0F1117] min-h-[90vh] flex items-center justify-center">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0">
+        {/* Subtle Gradient Spotlights - Indigo/Blue instead of heavy Purple */}
+        <div className="absolute top-[-10%] left-[20%] h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[20%] h-[500px] w-[500px] rounded-full bg-blue-600/10 blur-[120px]" />
+        
+        {/* Grid Texture */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'linear-gradient(to right, #334155 1px, transparent 1px), linear-gradient(to bottom, #334155 1px, transparent 1px)',
+            backgroundSize: '40px 40px'
+          }}
+        />
+        
+        {/* Vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#0F1117_100%)]" />
+      </div>
+
+      <section className="relative z-10 w-full">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-center px-6 text-center">
+          
+          {/* Badge */}
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 backdrop-blur-md">
+            <Sparkles className="size-4 text-indigo-400" />
+            <span className="text-sm font-medium text-indigo-300">AI Architecture Rendering</span>
+          </div>
+
+          <h1 className="text-balance text-5xl font-bold tracking-tight text-white sm:text-7xl font-bricolage-grotesque leading-[1.1]">
             {t('title')}
           </h1>
-          <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
+          <p className="mt-6 max-w-2xl text-lg text-slate-400 leading-relaxed">
             {t('description')}
           </p>
 
           <button
             type="button"
             onClick={handleUploadClick}
-            className="group relative mt-10 w-full max-w-3xl overflow-hidden rounded-[26px] border border-white/50 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.16)_100%)] shadow-2xl shadow-black/20 backdrop-blur-xl ring-1 ring-black/5 transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(0,0,0,0.35)] dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(28,30,36,0.72)_0%,rgba(18,18,20,0.58)_100%)] dark:shadow-black/40 disabled:cursor-not-allowed"
+            className="group relative mt-12 w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-[#1E293B]/60 p-1 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-indigo-500/50 hover:shadow-indigo-500/20 hover:-translate-y-1 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isUploading}
           >
-            <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.2),transparent_35%),radial-gradient(circle_at_75%_15%,rgba(255,255,255,0.14),transparent_30%)] opacity-90" />
-            <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/5 mix-blend-screen opacity-70" />
-            <div className="relative flex flex-col gap-4 px-6 py-6 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-              <div>
-                <p className="text-lg font-semibold text-foreground drop-shadow-sm">
-                  {t('uploadTitle')}
+            {/* Inner Content Area */}
+            <div className="relative flex items-center justify-between rounded-xl bg-[#0F1117]/80 border border-white/5 px-8 py-8 transition-colors group-hover:bg-[#0F1117]/60">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-xl font-semibold text-white">
+                  {isUploading ? 'Uploading...' : t('uploadTitle')}
                 </p>
-                <p className="text-sm text-muted-foreground">{t('uploadSub')}</p>
+                <p className="text-sm text-slate-400">{t('uploadSub')}</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/25 transition group-hover:scale-105">
-                <CloudUpload className="h-6 w-6" />
+              
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 group-hover:scale-110 group-hover:bg-indigo-500">
+                <CloudUpload className="h-7 w-7" />
               </div>
             </div>
+            
+            {/* Hover Glow Effect */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-indigo-500/0 via-indigo-500/10 to-indigo-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           </button>
+          
           <input
             ref={fileInputRef}
             type="file"
