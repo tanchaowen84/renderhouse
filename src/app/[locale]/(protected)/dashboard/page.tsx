@@ -72,7 +72,7 @@ export default async function DashboardPage({ params }: PageProps) {
           {projects.map((p) => (
             <LocaleLink
               key={p.id}
-              href={`/dashboard/${p.id}`}
+              href={`/workspace/${p.id}`}
               className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="relative h-40 w-full overflow-hidden bg-muted">

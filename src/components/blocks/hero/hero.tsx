@@ -66,7 +66,7 @@ export default function HeroSection() {
         return;
       }
       toast.success('Project created');
-      router.push(`/${locale}/dashboard/${projectId}`);
+      router.push(`/${locale}/workspace/${projectId}`);
     } catch (err) {
       console.error(err);
       toast.error('Upload or project creation failed');

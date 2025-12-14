@@ -2,10 +2,6 @@ import { DashboardSidebar } from '@/components/dashboard/dashboard-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import type { PropsWithChildren } from 'react';
 
-/**
- * inspired by dashboard-01
- * https://ui.shadcn.com/blocks
- */
 export default function DashboardLayout({ children }: PropsWithChildren) {
   return (
     <SidebarProvider
@@ -17,8 +13,9 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
       }
     >
       <DashboardSidebar variant="inset" />
-
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset className="min-h-screen bg-background">
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }
