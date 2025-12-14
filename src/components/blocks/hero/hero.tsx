@@ -1,7 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { CloudUpload } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { toast } from 'sonner';
@@ -29,30 +28,30 @@ export default function HeroSection() {
             {t('description')}
           </p>
 
-          <div className="mt-10 w-full max-w-4xl rounded-2xl border border-border bg-background shadow-xl">
-            <div className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-left">
-                <p className="text-lg font-semibold">{t('uploadTitle')}</p>
+          <button
+            type="button"
+            onClick={handleUploadClick}
+            className="group mt-10 w-full max-w-4xl rounded-[28px] border border-white/30 bg-white/30 shadow-xl shadow-black/15 backdrop-blur-xl transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_70px_-40px_rgba(0,0,0,0.45)]"
+          >
+            <div className="flex flex-col gap-4 px-6 py-6 text-left sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-lg font-semibold text-foreground">
+                  {t('uploadTitle')}
+                </p>
                 <p className="text-sm text-muted-foreground">{t('uploadSub')}</p>
               </div>
-              <Button
-                type="button"
-                size="lg"
-                className="gap-2"
-                onClick={handleUploadClick}
-              >
-                <Upload className="h-5 w-5" />
-                {t('uploadButton')}
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".png,.jpg,.jpeg"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-foreground shadow-lg shadow-black/20 transition group-hover:scale-105">
+                <CloudUpload className="h-6 w-6" />
+              </div>
             </div>
-          </div>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".png,.jpg,.jpeg"
+            className="hidden"
+            onChange={handleFileChange}
+          />
         </div>
       </section>
     </main>
