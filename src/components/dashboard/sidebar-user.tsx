@@ -94,30 +94,29 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
   };
 
   return (
-    <SidebarMenu className="border-t pt-4">
+    <SidebarMenu className="border-t border-white/5 pt-4">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="cursor-pointer data-[state=open]:bg-sidebar-accent 
-              data-[state=open]:text-sidebar-accent-foreground"
+              className="cursor-pointer text-slate-400 hover:text-white hover:bg-white/5 data-[state=open]:bg-white/10 data-[state=open]:text-white"
             >
               <UserAvatar
                 name={user.name}
                 image={user.image}
-                className="size-8 border"
+                className="size-8 border border-white/10"
               />
 
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs text-slate-500">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-[#1E293B] border-white/10 text-slate-300"
             side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
@@ -127,41 +126,41 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
                 <UserAvatar
                   name={user.name}
                   image={user.image}
-                  className="size-8 border"
+                  className="size-8 border border-white/10"
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-semibold text-white">{user.name}</span>
+                  <span className="truncate text-xs text-slate-500">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
 
-            {(showModeSwitch || showLocaleSwitch) && <DropdownMenuSeparator />}
+            {(showModeSwitch || showLocaleSwitch) && <DropdownMenuSeparator className="bg-white/10" />}
 
             {showModeSwitch && (
               <DropdownMenuGroup>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer">
+                  <DropdownMenuSubTrigger className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white">
                     <LaptopIcon className="mr-2 size-4" />
                     <span>{t('Common.mode.label')}</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
+                  <DropdownMenuSubContent className="bg-[#1E293B] border-white/10 text-slate-300">
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
                       onClick={() => setTheme('light')}
                     >
                       <SunIcon className="mr-2 size-4" />
                       <span>{t('Common.mode.light')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
                       onClick={() => setTheme('dark')}
                     >
                       <MoonIcon className="mr-2 size-4" />
                       <span>{t('Common.mode.dark')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
                       onClick={() => setTheme('system')}
                     >
                       <LaptopIcon className="mr-2 size-4" />
@@ -175,16 +174,16 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
             {showLocaleSwitch && (
               <DropdownMenuGroup>
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="cursor-pointer">
+                  <DropdownMenuSubTrigger className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white">
                     <Languages className="mr-2 size-4" />
                     <span>{t('Common.language')}</span>
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
+                  <DropdownMenuSubContent className="bg-[#1E293B] border-white/10 text-slate-300">
                     {routing.locales.map((localeOption) => (
                       <DropdownMenuItem
                         key={localeOption}
                         onClick={() => setLocale(localeOption)}
-                        className="cursor-pointer"
+                        className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
                       >
                         {websiteConfig.i18n.locales[localeOption].flag && (
                           <span className="mr-2 text-md">
@@ -201,10 +200,10 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
               </DropdownMenuGroup>
             )}
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-white/10" />
 
             <DropdownMenuItem
-              className="cursor-pointer"
+              className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
               onClick={async (event) => {
                 event.preventDefault();
                 handleSignOut();

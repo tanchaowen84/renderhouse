@@ -37,16 +37,20 @@ export function UpgradeCard() {
   }
 
   return (
-    <Card className="shadow-none">
-      <CardHeader className="gap-2">
-        <CardTitle className="flex items-center gap-2">
-          <SparklesIcon className="size-4" />
+    <Card className="shadow-none border border-white/10 bg-indigo-500/10 backdrop-blur-sm">
+      <CardHeader className="gap-2 p-4">
+        <CardTitle className="flex items-center gap-2 text-indigo-100 text-sm">
+          <SparklesIcon className="size-4 text-indigo-400" />
           {t('title')}
         </CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
+        <CardDescription className="text-slate-400 text-xs">{t('description')}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Button className="cursor-pointer w-full shadow-none" size="sm">
+      <CardContent className="p-4 pt-0">
+        <Button 
+          className="cursor-pointer w-full shadow-lg bg-indigo-600 hover:bg-indigo-500 text-white border-0" 
+          size="sm"
+          asChild
+        >
           <LocaleLink href={Routes.SettingsBilling}>{t('button')}</LocaleLink>
         </Button>
       </CardContent>

@@ -11,9 +11,10 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
           '--header-height': 'calc(var(--spacing) * 12)',
         } as React.CSSProperties
       }
+      className="bg-[#0F1117]"
     >
-      <DashboardSidebar variant="inset" />
-      <SidebarInset className="min-h-screen bg-background">
+      <DashboardSidebar />
+      <SidebarInset className="min-h-screen bg-[#0F1117] overflow-x-hidden border-none shadow-none m-0 rounded-none">
         {children}
       </SidebarInset>
     </SidebarProvider>

@@ -29,7 +29,7 @@ export function SidebarMain({ items }: { items: NestedMenuItem[] }) {
       {items.map((item) =>
         item.items && item.items.length > 0 ? (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-slate-500">{item.title}</SidebarGroupLabel>
             <SidebarGroupContent className="flex flex-col gap-2">
               <SidebarMenu>
                 {item.items.map((subItem) => (
@@ -37,6 +37,7 @@ export function SidebarMain({ items }: { items: NestedMenuItem[] }) {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(subItem.href)}
+                      className="text-slate-400 hover:text-slate-100 hover:bg-white/5 active:bg-white/10 data-[active=true]:bg-indigo-500/10 data-[active=true]:text-indigo-400"
                     >
                       <LocaleLink href={subItem.href || ''}>
                         {subItem.icon ? subItem.icon : null}
@@ -56,7 +57,11 @@ export function SidebarMain({ items }: { items: NestedMenuItem[] }) {
             <SidebarGroupContent className="flex flex-col gap-2">
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.href)}
+                    className="text-slate-400 hover:text-slate-100 hover:bg-white/5 active:bg-white/10 data-[active=true]:bg-indigo-500/10 data-[active=true]:text-indigo-400"
+                  >
                     <LocaleLink href={item.href || ''}>
                       {item.icon ? item.icon : null}
                       <span className="truncate font-medium text-sm">

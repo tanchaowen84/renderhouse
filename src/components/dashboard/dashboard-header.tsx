@@ -30,22 +30,22 @@ export function DashboardHeader({
   actions,
 }: DashboardHeaderProps) {
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1 cursor-pointer" />
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-white/5 bg-[#0F1117] transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6 text-slate-400">
+        <SidebarTrigger className="-ml-1 cursor-pointer hover:bg-white/5 hover:text-white" />
         <Separator
           orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
+          className="mx-2 data-[orientation=vertical]:h-4 bg-white/10"
         />
 
         <Breadcrumb>
-          <BreadcrumbList className="text-base font-medium">
+          <BreadcrumbList className="text-base font-medium text-slate-400">
             {breadcrumbs.map((item, index) => (
               <React.Fragment key={`breadcrumb-${index}`}>
                 {index > 0 && (
                   <BreadcrumbSeparator
                     key={`sep-${index}`}
-                    className="hidden md:block"
+                    className="hidden md:block text-slate-600"
                   />
                 )}
                 <BreadcrumbItem
@@ -55,9 +55,9 @@ export function DashboardHeader({
                   }
                 >
                   {item.isCurrentPage ? (
-                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="text-slate-200 font-semibold">{item.label}</BreadcrumbPage>
                   ) : (
-                    item.label
+                    <span className="hover:text-slate-200 transition-colors cursor-default">{item.label}</span>
                   )}
                 </BreadcrumbItem>
               </React.Fragment>

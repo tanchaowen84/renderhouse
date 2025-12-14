@@ -48,15 +48,19 @@ export function DashboardSidebar({
   }, []);
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar 
+      collapsible="icon" 
+      className="border-r border-white/5 bg-[#0F1117]" 
+      {...props}
+    >
+      <SidebarHeader className="bg-[#0F1117]">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 hover:bg-white/5 active:bg-white/10"
             >
-              <LocaleLink href={Routes.Root}>
+              <LocaleLink href={Routes.Root} className="text-slate-200 hover:text-white transition-colors">
                 <Logo className="size-5" />
                 <span className="truncate font-semibold text-base">
                   {t('Metadata.name')}
@@ -67,11 +71,11 @@ export function DashboardSidebar({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="bg-[#0F1117] text-slate-400">
         <SidebarMain items={filteredSidebarLinks} />
       </SidebarContent>
 
-      <SidebarFooter className="flex flex-col gap-4">
+      <SidebarFooter className="flex flex-col gap-4 bg-[#0F1117] border-t border-white/5">
         {/* Only show UI components when not in loading state */}
         {!isPending && mounted && (
           <>
