@@ -42,7 +42,7 @@ export default function HeroSection() {
                 </p>
                 <p className="text-sm text-muted-foreground">{t('uploadSub')}</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-foreground shadow-lg shadow-black/20 transition group-hover:scale-105">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/25 transition group-hover:scale-105">
                 <CloudUpload className="h-6 w-6" />
               </div>
             </div>
