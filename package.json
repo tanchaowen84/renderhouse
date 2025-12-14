@@ -107,6 +107,7 @@
     "react-resizable-panels": "^2.1.7",
     "react-tweet": "^3.2.2",
     "react-use-measure": "^2.1.7",
+    "react-zoom-pan-pinch": "^3.7.0",
     "recharts": "^2.15.1",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-pretty-code": "^0.14.0",
