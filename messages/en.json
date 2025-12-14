@@ -599,11 +599,14 @@
     "title": "MkSaaS",
     "description": "Make AI SaaS in days, simply and effortlessly",
     "hero": {
-      "title": "Create Beautiful Flowcharts with FlowChart AI",
-      "description": "FlowChart AI helps you transform ideas into detailed, professional flowcharts instantly. Use natural language to design, edit, and collaborate on diagrams—no design skills required.",
-      "introduction": "Introducing FlowChart AI",
-      "primary": "Start Creating",
-      "secondary": "See Demo"
+      "title": "How will your project look like?",
+      "description": "AI photorealistic renders from your architectural drawings.",
+      "uploadTitle": "Upload your drawing",
+      "uploadSub": "PNG / JPG / JPEG · sketch / floor plan / elevation / photo",
+      "uploadButton": "Upload & render",
+      "optionalSettings": "Style & lighting (optional)",
+      "style": "Style",
+      "lighting": "Lighting"
     },
     "logocloud": {
       "title": "Your favorite companies are our partners"
