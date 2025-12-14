@@ -1,9 +1,5 @@
-import { NewsletterFormCard } from '@/components/settings/notification/newsletter-form-card';
+import { notFound } from 'next/navigation';
 
 export default function NotificationPage() {
-  return (
-    <div className="grid gap-8 md:grid-cols-2">
-      <NewsletterFormCard />
-    </div>
-  );
+  notFound();
 }

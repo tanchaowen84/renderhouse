@@ -565,6 +565,11 @@
       "title": "Upgrade",
       "description": "Upgrade to Pro to access all features",
       "button": "Upgrade"
+    },
+    "empty": {
+      "title": "No renders yet",
+      "description": "Start by uploading a drawing on the homepage and your renders will appear here.",
+      "cta": "Go to upload"
     }
   },
   "Mail": {
