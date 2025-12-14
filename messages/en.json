@@ -1026,6 +1026,12 @@
       "startRender": "Start render",
       "replace": "Replace image"
     },
-    "noInput": "No input image yet."
+    "noInput": "No input image yet.",
+    "header": {
+      "back": "Back to dashboard"
+    },
+    "status": {
+      "default": "Free plan"
+    }
   }
 }
