@@ -21,13 +21,16 @@ import type { PropsWithChildren } from 'react';
  */
 export function Providers({ children }: PropsWithChildren) {
   const theme = useTheme();
-  const defaultMode = websiteConfig.metadata.mode?.defaultMode ?? 'dark';
+  const modeConfig = websiteConfig.metadata.mode;
+  const defaultMode = modeConfig?.defaultMode ?? 'light';
+  const forceTheme = modeConfig?.enableSwitch === false ? defaultMode : undefined;
 
   return (
     <ThemeProvider
       attribute="class"
       defaultTheme={defaultMode}
       enableSystem={false}
+      forcedTheme={forceTheme}
       disableTransitionOnChange
     >
       <ActiveThemeProvider>
