@@ -1,4 +1,5 @@
 import { boolean, pgTable, text, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -87,4 +88,15 @@ export const creditsHistory = pgTable("credits_history", {
 	creemOrderId: text('creem_order_id'),
 	createdAt: timestamp('created_at').notNull().defaultNow(),
 	metadata: jsonb('metadata').default('{}'),
+});
+
+export const project = pgTable("project", {
+	id: text("id").primaryKey(),
+	userId: text("user_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
+	title: text("title"),
+	inputUrl: text("input_url").notNull(),
+	outputUrls: jsonb("output_urls").default(sql`'[]'::jsonb`),
+	status: text("status").notNull().default('uploaded'), // uploaded | rendering | done | failed
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

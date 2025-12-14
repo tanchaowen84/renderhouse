@@ -570,6 +570,9 @@
       "title": "No renders yet",
       "description": "Start by uploading a drawing on the homepage and your renders will appear here.",
       "cta": "Go to upload"
+    },
+    "card": {
+      "open": "Open"
     }
   },
   "Mail": {
@@ -1015,5 +1018,14 @@
     "title": "Canvas",
     "description": "Create beautiful flowcharts with AI assistance - draw, edit, and collaborate on your diagrams",
     "subtitle": "AI-Powered Flowchart Editor"
+  },
+  "Workspace": {
+    "actions": {
+      "title": "What do you want to do?",
+      "subtitle": "Use the image you uploaded to generate AI renders, or replace it.",
+      "startRender": "Start render",
+      "replace": "Replace image"
+    },
+    "noInput": "No input image yet."
   }
 }
