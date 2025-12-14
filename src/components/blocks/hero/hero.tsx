@@ -31,11 +31,13 @@ export default function HeroSection() {
           <button
             type="button"
             onClick={handleUploadClick}
-            className="group mt-10 w-full max-w-4xl rounded-[28px] border border-white/30 bg-white/30 shadow-xl shadow-black/15 backdrop-blur-xl transition duration-200 hover:-translate-y-1 hover:shadow-[0_32px_70px_-40px_rgba(0,0,0,0.45)]"
+            className="group relative mt-10 w-full max-w-3xl overflow-hidden rounded-[26px] border border-white/50 bg-[linear-gradient(135deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.16)_100%)] shadow-2xl shadow-black/20 backdrop-blur-xl ring-1 ring-black/5 transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_60px_-36px_rgba(0,0,0,0.35)] dark:border-white/15 dark:bg-[linear-gradient(135deg,rgba(28,30,36,0.72)_0%,rgba(18,18,20,0.58)_100%)] dark:shadow-black/40"
           >
-            <div className="flex flex-col gap-4 px-6 py-6 text-left sm:flex-row sm:items-center sm:justify-between">
+            <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.2),transparent_35%),radial-gradient(circle_at_75%_15%,rgba(255,255,255,0.14),transparent_30%)] opacity-90" />
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-white/5 mix-blend-screen opacity-70" />
+            <div className="relative flex flex-col gap-4 px-6 py-6 text-left sm:flex-row sm:items-center sm:justify-between sm:gap-6">
               <div>
-                <p className="text-lg font-semibold text-foreground">
+                <p className="text-lg font-semibold text-foreground drop-shadow-sm">
                   {t('uploadTitle')}
                 </p>
                 <p className="text-sm text-muted-foreground">{t('uploadSub')}</p>
