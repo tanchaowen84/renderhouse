@@ -18,55 +18,55 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: '#0F1117', // Dark Slate Background (Global)
-        foreground: '#F1F5F9', // Light Slate Text
+        background: '#f5f6f7',
+        foreground: '#1f242c',
         card: {
-          DEFAULT: '#1E293B', // Slate-800 for cards
-          foreground: '#F1F5F9',
+          DEFAULT: '#ffffff',
+          foreground: '#1f242c',
         },
         popover: {
-          DEFAULT: '#0F1117',
-          foreground: '#F1F5F9',
+          DEFAULT: '#ffffff',
+          foreground: '#1f242c',
         },
         primary: {
-          DEFAULT: '#6366f1', // Indigo-500 (Less "Purple", more "Deep Blue/Indigo")
+          DEFAULT: '#1f4b3e', // bamboo green
           foreground: '#ffffff',
         },
         secondary: {
-          DEFAULT: '#334155', // Slate-700
-          foreground: '#F1F5F9',
+          DEFAULT: '#e6e8ec',
+          foreground: '#1f242c',
         },
         muted: {
-          DEFAULT: '#1e293b', // Slate-800
-          foreground: '#94a3b8', // Slate-400
+          DEFAULT: '#f0f2f5',
+          foreground: '#6a707a',
         },
         accent: {
-          DEFAULT: '#1e293b',
-          foreground: '#F1F5F9',
+          DEFAULT: '#f0f2f5',
+          foreground: '#1f242c',
         },
         destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT: '#ff7a7a',
+          foreground: '#ffffff',
         },
-        border: 'rgba(255,255,255,0.1)', // Subtle white border for glass effect
-        input: 'rgba(255,255,255,0.05)',
-        ring: 'rgba(99,102,241,0.5)', // Indigo ring
+        border: '#e3e6ea',
+        input: '#e3e6ea',
+        ring: '#1f4b3e',
         chart: {
-          '1': 'hsl(var(--chart-1))',
-          '2': 'hsl(var(--chart-2))',
-          '3': 'hsl(var(--chart-3))',
-          '4': 'hsl(var(--chart-4))',
-          '5': 'hsl(var(--chart-5))',
+          '1': '#1f4b3e',
+          '2': '#4b82f3',
+          '3': '#6bb4a0',
+          '4': '#f1c86a',
+          '5': '#d67b6d',
         },
         sidebar: {
-          DEFAULT: '#0F1117',
-          foreground: '#F1F5F9',
-          primary: '#6366f1',
+          DEFAULT: '#f5f6f7',
+          foreground: '#1f242c',
+          primary: '#1f4b3e',
           'primary-foreground': '#ffffff',
-          accent: '#1E293B',
-          'accent-foreground': '#F1F5F9',
-          border: 'rgba(255,255,255,0.1)',
-          ring: '#6366f1',
+          accent: '#f0f2f5',
+          'accent-foreground': '#1f242c',
+          border: '#e3e6ea',
+          ring: '#1f4b3e',
         },
       },
       borderRadius: {
@@ -83,5 +83,4 @@ const config: Config = {
   plugins: [animate],
 };
 export default config;
-
 

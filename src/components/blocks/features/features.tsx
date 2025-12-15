@@ -53,8 +53,7 @@ export default function FeaturesSection() {
 
   return (
     <section id="features" className="px-4 py-16">
-      <div className="bg-linear-to-b absolute inset-0 -z-10 sm:inset-6 sm:rounded-b-3xl dark:block dark:to-[color-mix(in_oklab,var(--color-zinc-900)_75%,var(--color-background))]" />
-      <div className="mx-auto max-w-6xl space-y-8 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)]">
+      <div className="mx-auto max-w-6xl space-y-8 lg:space-y-16">
         <HeaderSection
           title={t('title')}
           subtitle={t('subtitle')}
@@ -63,13 +62,13 @@ export default function FeaturesSection() {
           descriptionAs="p"
         />
 
-        <div className="grid gap-12 sm:px-12 lg:grid-cols-12 lg:gap-24 lg:px-0">
-          <div className="lg:col-span-5 flex flex-col gap-8">
-            <div className="lg:pr-0 text-left">
-              <h3 className="text-3xl font-semibold lg:text-4xl text-gradient_indigo-purple leading-normal py-1">
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="lg:pr-0 text-left space-y-3">
+              <h3 className="text-3xl font-semibold lg:text-4xl text-[#1f242c] leading-normal">
                 {t('title')}
               </h3>
-              <p className="mt-4 text-muted-foreground">{t('description')}</p>
+              <p className="mt-2 text-[#6a707a]">{t('description')}</p>
             </div>
             <Accordion
               type="single"
@@ -124,8 +123,8 @@ export default function FeaturesSection() {
             </Accordion>
           </div>
 
-          <div className="bg-background w-full relative flex overflow-hidden rounded-2xl border p-2 lg:h-auto lg:col-span-7">
-            <div className="aspect-76/59 bg-background relative w-full rounded-2xl">
+          <div className="relative flex w-full overflow-hidden rounded-2xl border border-[#e3e6ea] bg-white p-2 shadow-[0_18px_40px_rgba(0,0,0,0.08)] lg:col-span-7">
+            <div className="aspect-76/59 relative w-full rounded-2xl">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeItem}-id`}
@@ -133,18 +132,11 @@ export default function FeaturesSection() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.98 }}
                   transition={{ duration: 0.2 }}
-                  className="size-full overflow-hidden rounded-2xl border bg-white dark:bg-zinc-900 shadow-md flex items-center justify-center"
+                  className="size-full overflow-hidden rounded-2xl border border-[#e6e8ec] bg-white flex items-center justify-center"
                 >
                   <Image
                     src={images[activeItem].image}
-                    className="max-w-full max-h-full object-contain dark:hidden"
-                    alt={images[activeItem].alt}
-                    width={1207}
-                    height={929}
-                  />
-                  <Image
-                    src={images[activeItem].darkImage}
-                    className="max-w-full max-h-full object-contain dark:block hidden"
+                    className="max-w-full max-h-full object-contain"
                     alt={images[activeItem].alt}
                     width={1207}
                     height={929}
@@ -152,11 +144,6 @@ export default function FeaturesSection() {
                 </motion.div>
               </AnimatePresence>
             </div>
-            <BorderBeam
-              duration={6}
-              size={200}
-              className="from-transparent via-violet-700 to-transparent dark:via-white/50"
-            />
           </div>
         </div>
       </div>

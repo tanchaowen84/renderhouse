@@ -43,7 +43,7 @@ export function HeaderSection({
       {title ? (
         <TitleComponent
           className={cn(
-            'uppercase tracking-wider text-gradient_indigo-purple font-semibold font-mono',
+            'uppercase tracking-[0.14em] text-[12px] text-[#7a7f87] font-semibold',
             titleClassName
           )}
         >
@@ -53,7 +53,7 @@ export function HeaderSection({
       {subtitle ? (
         <SubtitleComponent
           className={cn(
-            'text-balance text-2xl text-foreground',
+            'text-balance text-3xl lg:text-4xl font-semibold text-[#1f242c]',
             subtitleClassName
           )}
         >
@@ -63,7 +63,7 @@ export function HeaderSection({
       {description ? (
         <DescriptionComponent
           className={cn(
-            'text-balance text-lg text-muted-foreground',
+            'text-balance text-lg text-[#6a707a] leading-relaxed',
             descriptionClassName
           )}
         >

@@ -1,4 +1,7 @@
 import HeroSection from '@/components/blocks/hero/hero';
+import { UseCasesSection } from '@/components/blocks/use-cases';
+import { HowItWorksSection } from '@/components/blocks/how-it-works';
+import FeaturesSection from '@/components/blocks/features/features';
 import { constructMetadata } from '@/lib/metadata';
 import { getUrlWithLocale } from '@/lib/urls/urls';
 import type { Metadata } from 'next';
@@ -35,6 +38,9 @@ export default async function HomePage(props: HomePageProps) {
     <>
       <div className="flex flex-col">
         <HeroSection />
+        <UseCasesSection />
+        <HowItWorksSection />
+        <FeaturesSection />
       </div>
     </>
   );
