@@ -55,24 +55,24 @@ export function WorkspaceClient({
   return (
     <>
       {/* Tall Floating Sidebar */}
-      <div className="absolute left-6 top-6 bottom-6 z-30 w-[400px] flex flex-col pointer-events-auto">
-        <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#1E293B]/90 shadow-2xl backdrop-blur-xl transition-all duration-500">
+      <div className="absolute left-6 top-6 bottom-6 z-30 w-[380px] max-w-[86vw] flex flex-col pointer-events-auto">
+        <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-[#d9dde1] bg-white/92 shadow-[0_24px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-all duration-400">
           <AnimatePresence mode="wait">
             {step === 'initial' && (
               <motion.div
                 key="initial"
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -18 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                exit={{ opacity: 0, x: -18 }}
                 className="flex h-full flex-col p-6"
               >
-                <div className="mb-4 flex items-center gap-2 text-slate-100">
-                  <LayersIcon className="size-5 text-indigo-400" />
-                  <h2 className="text-lg font-bold">
+                <div className="mb-4 flex items-center gap-2 text-[#1f242c]">
+                  <LayersIcon className="size-5 text-[#6bb4a0]" />
+                  <h2 className="text-lg font-semibold">
                     {messages.actions.title}
                   </h2>
                 </div>
-                <p className="mb-8 text-sm leading-relaxed text-slate-400">
+                <p className="mb-8 text-sm leading-relaxed text-[#6a707a]">
                   {messages.actions.subtitle}
                 </p>
 
@@ -80,17 +80,17 @@ export function WorkspaceClient({
                   <button
                     type="button"
                     onClick={() => setStep('settings')}
-                    className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 p-[1px] shadow-lg transition-all hover:shadow-indigo-500/25 active:scale-[0.98]"
+                    className="group relative w-full overflow-hidden rounded-2xl border border-[#1f4b3e] bg-[#1f4b3e] px-5 py-5 text-left text-white shadow-[0_14px_32px_rgba(0,0,0,0.18)] transition hover:brightness-[1.05]"
                   >
-                    <div className="relative flex items-center gap-4 rounded-2xl bg-[#1E293B]/40 px-5 py-5 backdrop-blur-sm transition-colors group-hover:bg-transparent">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/25 bg-white/10 text-white">
                         <SparklesIcon className="size-6" />
                       </div>
                       <div className="flex flex-col items-start text-left">
-                        <span className="text-base font-bold text-white">
+                        <span className="text-base font-semibold">
                           {messages.actions.startRender}
                         </span>
-                        <span className="text-xs text-indigo-100/70">
+                        <span className="text-xs text-white/80">
                           Generate new AI render
                         </span>
                       </div>
@@ -99,17 +99,17 @@ export function WorkspaceClient({
 
                   <button
                     type="button"
-                    className="group w-full rounded-2xl border border-white/5 bg-white/5 px-5 py-5 text-left transition-all hover:bg-white/10 hover:border-white/10 active:scale-[0.98]"
+                    className="group w-full rounded-2xl border border-[#d9dde1] bg-white px-5 py-5 text-left transition hover:bg-[#f5f7fa]"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-slate-400 group-hover:text-white transition-colors">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#d9dde1] bg-white text-[#4c525c]">
                         <RefreshCwIcon className="size-6" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-base font-semibold text-slate-300 group-hover:text-white transition-colors">
+                        <span className="text-base font-semibold text-[#1f242c]">
                           {messages.actions.replace}
                         </span>
-                        <span className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                        <span className="text-xs text-[#7a7f87]">
                           Upload different image
                         </span>
                       </div>
@@ -122,39 +122,38 @@ export function WorkspaceClient({
             {step === 'settings' && (
               <motion.div
                 key="settings"
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 18 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
+                exit={{ opacity: 0, x: 18 }}
                 className="flex h-full flex-col"
               >
                 {/* Header */}
-                <div className="flex items-center gap-3 border-b border-white/5 p-6">
+                <div className="flex items-center gap-3 border-b border-[#e6e8ec] bg-white px-6 py-4">
                   <button
                     type="button"
                     onClick={() => setStep('initial')}
-                    className="rounded-full p-2 text-slate-400 hover:bg-white/5 hover:text-white"
+                    className="rounded-full p-2 text-[#4c525c] transition hover:bg-[#f3f5f8]"
                   >
                     <ArrowLeftIcon className="size-4" />
                   </button>
-                  <h2 className="text-lg font-bold text-white">
+                  <h2 className="text-lg font-semibold text-[#1f242c]">
                     Render Settings
                   </h2>
                 </div>
 
                 {/* Scrollable Settings Area */}
-                <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-[#cfd4da] scrollbar-track-transparent">
                   {/* Location Section */}
                   <div className="mb-8">
-                    <h3 className="mb-3 text-sm font-semibold text-slate-300">
+                    <h3 className="mb-2 text-sm font-semibold text-[#1f242c]">
                       Location
                     </h3>
-                    <p className="mb-3 text-xs text-slate-500">
-                      Select the location for your render to get accurate
-                      lighting
+                    <p className="mb-3 text-xs text-[#7a7f87]">
+                      Select the location for your render to get accurate lighting
                     </p>
                     <button
                       type="button"
-                      className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-left text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+                      className="flex w-full items-center gap-3 rounded-xl border border-[#d9dde1] bg-white px-4 py-3 text-left text-sm text-[#4c525c] transition hover:border-[#1f4b3e] hover:bg-[#f6faf8]"
                     >
                       <MapPinIcon className="size-4" />
                       <span>Choose location</span>
@@ -163,10 +162,10 @@ export function WorkspaceClient({
 
                   {/* Lighting Section */}
                   <div className="mb-8">
-                    <h3 className="mb-3 text-sm font-semibold text-slate-300">
+                    <h3 className="mb-2 text-sm font-semibold text-[#1f242c]">
                       Lighting
                     </h3>
-                    <p className="mb-3 text-xs text-slate-500">
+                    <p className="mb-3 text-xs text-[#7a7f87]">
                       Choose the time of day for your exterior render
                     </p>
                     <div className="grid grid-cols-3 gap-3">
@@ -175,43 +174,31 @@ export function WorkspaceClient({
                           id: 'sunrise',
                           label: 'Sunrise',
                           icon: SunriseIcon,
-                          color: 'text-orange-400',
-                          bg: 'bg-orange-400/20',
                         },
                         {
                           id: 'morning',
                           label: 'Morning',
                           icon: CloudSunIcon,
-                          color: 'text-sky-400',
-                          bg: 'bg-sky-400/20',
                         },
                         {
                           id: 'noon',
                           label: 'Noon',
                           icon: SunIcon,
-                          color: 'text-yellow-400',
-                          bg: 'bg-yellow-400/20',
                         },
                         {
                           id: 'afternoon',
                           label: 'Afternoon',
                           icon: SunIcon,
-                          color: 'text-amber-400',
-                          bg: 'bg-amber-400/20',
                         },
                         {
                           id: 'sunset',
                           label: 'Sunset',
                           icon: SunsetIcon,
-                          color: 'text-rose-400',
-                          bg: 'bg-rose-400/20',
                         },
                         {
                           id: 'night',
                           label: 'Night',
                           icon: MoonIcon,
-                          color: 'text-indigo-400',
-                          bg: 'bg-indigo-400/20',
                         },
                       ].map((item) => (
                         <button
@@ -221,16 +208,12 @@ export function WorkspaceClient({
                           className={cn(
                             'flex flex-col items-center justify-center gap-2 rounded-xl border p-3 transition-all',
                             selectedLighting === item.id
-                              ? 'border-indigo-500 bg-indigo-500/10 shadow-[0_0_20px_-5px_rgba(99,102,241,0.3)]'
-                              : 'border-white/5 bg-white/5 hover:bg-white/10'
+                              ? 'border-[#1f4b3e] bg-[#f6faf8] shadow-[0_12px_28px_rgba(0,0,0,0.08)]'
+                              : 'border-[#d9dde1] bg-white hover:border-[#1f4b3e] hover:bg-[#f6faf8]'
                           )}
                         >
                           <div
-                            className={cn(
-                              'flex h-10 w-10 items-center justify-center rounded-full',
-                              item.bg,
-                              item.color
-                            )}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#d9dde1] bg-white text-[#1f4b3e]"
                           >
                             <item.icon className="size-5" />
                           </div>
@@ -238,8 +221,8 @@ export function WorkspaceClient({
                             className={cn(
                               'text-xs font-medium',
                               selectedLighting === item.id
-                                ? 'text-white'
-                                : 'text-slate-400'
+                                ? 'text-[#1f4b3e]'
+                                : 'text-[#4c525c]'
                             )}
                           >
                             {item.label}
@@ -251,28 +234,28 @@ export function WorkspaceClient({
 
                   {/* Camera Angle */}
                   <div className="mb-8">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold text-slate-300">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[#1f242c]">
                         Camera Angle
                       </h3>
                     </div>
                     <div
                       onClick={() => setMaintainAngle(!maintainAngle)}
-                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/5 bg-white/5 p-4 hover:bg-white/10 transition-colors"
+                      className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#d9dde1] bg-white p-4 transition hover:border-[#1f4b3e] hover:bg-[#f6faf8]"
                     >
                       <div
                         className={cn(
                           'flex h-5 w-5 items-center justify-center rounded border transition-colors',
                           maintainAngle
-                            ? 'bg-indigo-500 border-indigo-500'
-                            : 'border-slate-500'
+                            ? 'border-[#1f4b3e] bg-[#1f4b3e]'
+                            : 'border-[#b8bec6]'
                         )}
                       >
                         {maintainAngle && (
                           <div className="h-2 w-2 rounded-[1px] bg-white" />
                         )}
                       </div>
-                      <span className="text-sm text-slate-300">
+                      <span className="text-sm text-[#1f242c]">
                         Maintain angle
                       </span>
                     </div>
@@ -280,25 +263,24 @@ export function WorkspaceClient({
 
                   {/* More Details */}
                   <div className="mb-4">
-                    <h3 className="mb-3 text-sm font-semibold text-slate-300">
+                    <h3 className="mb-2 text-sm font-semibold text-[#1f242c]">
                       More Details
                     </h3>
                     <textarea
                       placeholder="e.g., modern style, spring/summer setting, upscale neighborhood..."
-                      className="w-full h-32 rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none resize-none"
+                      className="h-28 w-full resize-none rounded-xl border border-[#d9dde1] bg-white p-4 text-sm text-[#1f242c] placeholder:text-[#9aa1aa] focus:border-[#1f4b3e] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Footer Action */}
-                <div className="border-t border-white/5 p-6">
+                <div className="border-t border-[#e6e8ec] bg-white px-6 py-4">
                   <button
                     type="button"
                     onClick={() => {
-                      // Trigger render logic here
                       console.log('Rendering...');
                     }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#1f4b3e] bg-[#1f4b3e] py-3.5 text-sm font-semibold text-white transition hover:brightness-[1.05] active:brightness-[0.96]"
                   >
                     <span>Render</span>
                     <ChevronRightIcon className="size-4" />
@@ -324,11 +306,11 @@ export function WorkspaceClient({
           {({ zoomIn, zoomOut, resetTransform }) => (
             <>
               {/* Floating Zoom Controls */}
-              <div className="absolute bottom-8 right-8 z-40 flex flex-col gap-2 rounded-xl bg-[#1E293B]/90 p-1.5 shadow-xl backdrop-blur-md border border-white/10 pointer-events-auto">
+              <div className="absolute bottom-8 right-8 z-40 flex flex-col gap-2 rounded-xl border border-[#d9dde1] bg-white/92 p-1.5 shadow-[0_14px_32px_rgba(0,0,0,0.08)] backdrop-blur pointer-events-auto">
                 <button
                   type="button"
                   onClick={() => zoomIn()}
-                  className="rounded-lg p-2.5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+                  className="rounded-lg p-2.5 text-[#4c525c] transition hover:bg-[#f3f5f8]"
                   title="Zoom In"
                 >
                   <ZoomInIcon className="size-5" />
@@ -336,16 +318,16 @@ export function WorkspaceClient({
                 <button
                   type="button"
                   onClick={() => zoomOut()}
-                  className="rounded-lg p-2.5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+                  className="rounded-lg p-2.5 text-[#4c525c] transition hover:bg-[#f3f5f8]"
                   title="Zoom Out"
                 >
                   <ZoomOutIcon className="size-5" />
                 </button>
-                <div className="mx-2 h-px bg-white/10" />
+                <div className="mx-2 h-px bg-[#e6e8ec]" />
                 <button
                   type="button"
                   onClick={() => resetTransform()}
-                  className="rounded-lg p-2.5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+                  className="rounded-lg p-2.5 text-[#4c525c] transition hover:bg-[#f3f5f8]"
                   title="Reset View"
                 >
                   <MaximizeIcon className="size-5" />
@@ -356,26 +338,25 @@ export function WorkspaceClient({
                 wrapperClass="!w-full !h-full"
                 contentClass="!w-full !h-full flex items-center justify-center"
               >
-                <div className="relative flex h-full w-full items-center justify-center p-20 pl-[400px]">
+                <div className="relative flex h-full w-full items-center justify-center p-10 pl-[420px]">
                   {initialRecord.inputUrl ? (
-                    <div className="relative group shadow-2xl">
-                      {/* Image Container with White Border effect */}
-                      <div className="relative overflow-hidden rounded-sm ring-8 ring-white bg-white shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                    <div className="relative group">
+                      <div className="relative overflow-hidden rounded-xl border border-[#d9dde1] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
                         <Image
                           src={initialRecord.inputUrl}
                           alt={initialRecord.title ?? 'Project input'}
                           width={1920}
                           height={1080}
-                          className="h-auto w-auto max-w-[1200px] object-contain"
+                          className="h-auto w-auto max-w-[1100px] object-contain"
                           priority
                           draggable={false}
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center gap-4 text-slate-500">
-                      <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/5 ring-1 ring-white/10 border border-dashed border-white/10">
-                        <UploadIcon className="size-8 opacity-50" />
+                    <div className="flex flex-col items-center justify-center gap-4 text-[#7a7f87]">
+                      <div className="flex h-24 w-24 items-center justify-center rounded-3xl border border-dashed border-[#cfd4da] bg-white/80">
+                        <UploadIcon className="size-8 opacity-60" />
                       </div>
                       <p className="font-medium">{messages.noInput}</p>
                     </div>
