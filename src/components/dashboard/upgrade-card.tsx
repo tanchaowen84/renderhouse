@@ -37,17 +37,19 @@ export function UpgradeCard() {
   }
 
   return (
-    <Card className="shadow-none border border-white/10 bg-indigo-500/10 backdrop-blur-sm">
-      <CardHeader className="gap-2 p-4">
-        <CardTitle className="flex items-center gap-2 text-indigo-100 text-sm">
-          <SparklesIcon className="size-4 text-indigo-400" />
+    <Card className="border border-[#d9dde1] bg-white shadow-[0_14px_32px_rgba(0,0,0,0.06)]">
+      <CardHeader className="gap-1 p-4">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-[#1f242c]">
+          <SparklesIcon className="size-4 text-[#6bb4a0]" />
           {t('title')}
         </CardTitle>
-        <CardDescription className="text-slate-400 text-xs">{t('description')}</CardDescription>
+        <CardDescription className="text-xs text-[#6a707a]">
+          {t('description')}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <Button 
-          className="cursor-pointer w-full shadow-lg bg-indigo-600 hover:bg-indigo-500 text-white border-0" 
+        <Button
+          className="w-full cursor-pointer rounded-lg border border-[#6bb4a0] bg-white text-[#1f4b3e] shadow-none transition hover:bg-[#f1f7f4]"
           size="sm"
           asChild
         >

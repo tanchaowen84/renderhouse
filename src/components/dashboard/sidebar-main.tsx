@@ -29,19 +29,21 @@ export function SidebarMain({ items }: { items: NestedMenuItem[] }) {
       {items.map((item) =>
         item.items && item.items.length > 0 ? (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel className="text-slate-500">{item.title}</SidebarGroupLabel>
-            <SidebarGroupContent className="flex flex-col gap-2">
+            <SidebarGroupLabel className="px-1 text-[12px] font-medium uppercase tracking-[0.08em] text-[#9aa1aa]">
+              {item.title}
+            </SidebarGroupLabel>
+            <SidebarGroupContent className="flex flex-col gap-1.5">
               <SidebarMenu>
                 {item.items.map((subItem) => (
                   <SidebarMenuItem key={subItem.title}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(subItem.href)}
-                      className="text-slate-400 hover:text-slate-100 hover:bg-white/5 active:bg-white/10 data-[active=true]:bg-indigo-500/10 data-[active=true]:text-indigo-400"
+                      className="rounded-lg text-[#4c525c] hover:text-[#1f242c] hover:bg-white data-[active=true]:border data-[active=true]:border-[#d9dde1] data-[active=true]:bg-white data-[active=true]:text-[#1f242c]"
                     >
                       <LocaleLink href={subItem.href || ''}>
                         {subItem.icon ? subItem.icon : null}
-                        <span className="truncate font-medium text-sm">
+                        <span className="truncate text-sm font-medium">
                           {subItem.title}
                         </span>
                       </LocaleLink>
@@ -54,17 +56,17 @@ export function SidebarMain({ items }: { items: NestedMenuItem[] }) {
         ) : (
           /* Render items without children directly in a SidebarMenu */
           <SidebarGroup key={item.title}>
-            <SidebarGroupContent className="flex flex-col gap-2">
+            <SidebarGroupContent className="flex flex-col gap-1.5">
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton 
                     asChild 
                     isActive={isActive(item.href)}
-                    className="text-slate-400 hover:text-slate-100 hover:bg-white/5 active:bg-white/10 data-[active=true]:bg-indigo-500/10 data-[active=true]:text-indigo-400"
+                    className="rounded-lg text-[#4c525c] hover:text-[#1f242c] hover:bg-white data-[active=true]:border data-[active=true]:border-[#d9dde1] data-[active=true]:bg-white data-[active=true]:text-[#1f242c]"
                   >
                     <LocaleLink href={item.href || ''}>
                       {item.icon ? item.icon : null}
-                      <span className="truncate font-medium text-sm">
+                      <span className="truncate text-sm font-medium">
                         {item.title}
                       </span>
                     </LocaleLink>

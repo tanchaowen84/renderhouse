@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
       className="bg-[#0F1117]"
     >
       <DashboardSidebar />
-      <SidebarInset className="min-h-screen bg-[#0F1117] overflow-x-hidden border-none shadow-none m-0 rounded-none">
+      <SidebarInset className="min-h-screen bg-[#f5f6f7] overflow-x-hidden border-none shadow-none m-0 rounded-none">
         {children}
       </SidebarInset>
     </SidebarProvider>

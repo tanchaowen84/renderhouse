@@ -94,29 +94,29 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
   };
 
   return (
-    <SidebarMenu className="border-t border-white/5 pt-4">
+    <SidebarMenu className="border-t border-[#e6e8ec] pt-4 text-[#4c525c]">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="cursor-pointer text-slate-400 hover:text-white hover:bg-white/5 data-[state=open]:bg-white/10 data-[state=open]:text-white"
+              className="cursor-pointer rounded-lg border border-transparent text-[#38404a] hover:border-[#d9dde1] hover:bg-white data-[state=open]:border-[#d9dde1] data-[state=open]:bg-white"
             >
               <UserAvatar
                 name={user.name}
                 image={user.image}
-                className="size-8 border border-white/10"
+                className="size-8 border border-[#d9dde1]"
               />
 
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs text-slate-500">{user.email}</span>
+                <span className="truncate font-semibold text-[#1f242c]">{user.name}</span>
+                <span className="truncate text-xs text-[#7a7f87]">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-[#1E293B] border-white/10 text-slate-300"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg border border-[#e6e8ec] bg-white text-[#38404a] shadow-[0_14px_32px_rgba(0,0,0,0.08)]"
             side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
@@ -126,16 +126,16 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
                 <UserAvatar
                   name={user.name}
                   image={user.image}
-                  className="size-8 border border-white/10"
+                  className="size-8 border border-[#d9dde1]"
                 />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-white">{user.name}</span>
-                  <span className="truncate text-xs text-slate-500">{user.email}</span>
+                  <span className="truncate font-semibold text-[#1f242c]">{user.name}</span>
+                  <span className="truncate text-xs text-[#7a7f87]">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
 
-            {(showModeSwitch || showLocaleSwitch) && <DropdownMenuSeparator className="bg-white/10" />}
+            {(showModeSwitch || showLocaleSwitch) && <DropdownMenuSeparator className="bg-[#e6e8ec]" />}
 
             {showModeSwitch && (
               <DropdownMenuGroup>
@@ -146,21 +146,21 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="bg-[#1E293B] border-white/10 text-slate-300">
                     <DropdownMenuItem
-                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
+                      className="cursor-pointer hover:bg-[#f3f5f8] focus:bg-[#f3f5f8]"
                       onClick={() => setTheme('light')}
                     >
                       <SunIcon className="mr-2 size-4" />
                       <span>{t('Common.mode.light')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
+                      className="cursor-pointer hover:bg-[#f3f5f8] focus:bg-[#f3f5f8]"
                       onClick={() => setTheme('dark')}
                     >
                       <MoonIcon className="mr-2 size-4" />
                       <span>{t('Common.mode.dark')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
+                      className="cursor-pointer hover:bg-[#f3f5f8] focus:bg-[#f3f5f8]"
                       onClick={() => setTheme('system')}
                     >
                       <LaptopIcon className="mr-2 size-4" />
@@ -183,7 +183,7 @@ export function SidebarUser({ user, className }: SidebarUserProps) {
                       <DropdownMenuItem
                         key={localeOption}
                         onClick={() => setLocale(localeOption)}
-                        className="cursor-pointer hover:bg-white/5 focus:bg-white/5 hover:text-white focus:text-white"
+                        className="cursor-pointer hover:bg-[#f3f5f8] focus:bg-[#f3f5f8]"
                       >
                         {websiteConfig.i18n.locales[localeOption].flag && (
                           <span className="mr-2 text-md">
