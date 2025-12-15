@@ -36,11 +36,11 @@ interface NavBarProps {
 
 const customNavigationMenuTriggerStyle = cn(
   navigationMenuTriggerStyle(),
-  'relative bg-transparent text-slate-400 cursor-pointer',
-  'hover:bg-white/5 hover:text-white',
-  'focus:bg-white/5 focus:text-white',
-  'data-active:font-semibold data-active:bg-transparent data-active:text-white',
-  'data-[state=open]:bg-transparent data-[state=open]:text-white'
+  'relative bg-transparent text-[#4c525c] cursor-pointer',
+  'hover:bg-white hover:text-[#1f242c]',
+  'focus:bg-white focus:text-[#1f242c]',
+  'data-active:font-semibold data-active:bg-white data-active:text-[#1f242c]',
+  'data-[state=open]:bg-white data-[state=open]:text-[#1f242c]'
 );
 
 export function Navbar({ scroll }: NavBarProps) {
@@ -60,20 +60,16 @@ export function Navbar({ scroll }: NavBarProps) {
   return (
     <section
       className={cn(
-        'sticky inset-x-0 top-0 z-100 py-4 transition-all duration-300',
-        scroll
-          ? scrolled
-            ? 'bg-[#0F1117]/80 backdrop-blur-md border-b border-white/5 supports-backdrop-filter:bg-[#0F1117]/60'
-            : 'bg-transparent'
-          : 'border-b border-white/5 bg-[#0F1117]'
+        'sticky inset-x-0 top-0 z-100 border-b border-[#e6e8ec] bg-white/92 backdrop-blur transition-all duration-300',
+        scroll && scrolled ? 'shadow-[0_10px_30px_rgba(0,0,0,0.06)]' : ''
       )}
     >
-      <Container className="px-4">
+      <Container className="px-4 py-4 lg:py-5 min-h-[76px] flex items-center">
         {/* desktop navbar */}
-        <nav className="hidden lg:flex">
+        <nav className="hidden lg:flex w-full items-center">
           {/* logo and name */}
           <div className="flex items-center">
-            <LocaleLink href="/" className="flex items-center space-x-2 text-slate-200 hover:text-white transition-colors">
+            <LocaleLink href="/" className="flex items-center space-x-2 text-[#1f242c] hover:text-[#1f4b3e] transition-colors">
               <Logo />
               <span className="text-xl font-semibold">
                 {t('Metadata.name')}
@@ -103,7 +99,7 @@ export function Navbar({ scroll }: NavBarProps) {
                         {item.title}
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <ul className="grid w-[400px] gap-4 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-[#1E293B] border border-white/10">
+                        <ul className="grid w-[400px] gap-4 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] bg-white border border-[#e6e8ec] shadow-[0_16px_32px_rgba(0,0,0,0.08)] rounded-xl">
                           {item.items?.map((subItem, subIndex) => {
                             const isSubItemActive =
                               subItem.href &&
@@ -124,20 +120,20 @@ export function Navbar({ scroll }: NavBarProps) {
                                     className={cn(
                                       'group flex select-none flex-row items-center gap-4 rounded-md',
                                       'p-2 leading-none no-underline outline-hidden transition-colors',
-                                      'hover:bg-white/5 hover:text-white',
-                                      'focus:bg-white/5 focus:text-white',
+                                      'hover:bg-[#f3f5f8] hover:text-[#1f242c]',
+                                      'focus:bg-[#f3f5f8] focus:text-[#1f242c]',
                                       isSubItemActive &&
-                                        'bg-white/5 text-white'
+                                        'bg-[#f3f5f8] text-[#1f242c]'
                                     )}
                                   >
                                     <div
                                       className={cn(
                                         'flex size-8 shrink-0 items-center justify-center transition-colors',
-                                        'bg-transparent text-slate-400',
-                                        'group-hover:bg-transparent group-hover:text-white',
-                                        'group-focus:bg-transparent group-focus:text-white',
+                                        'bg-transparent text-[#6a707a]',
+                                        'group-hover:bg-transparent group-hover:text-[#1f242c]',
+                                        'group-focus:bg-transparent group-focus:text-[#1f242c]',
                                         isSubItemActive &&
-                                          'bg-transparent text-white'
+                                          'bg-transparent text-[#1f242c]'
                                       )}
                                     >
                                       {subItem.icon ? subItem.icon : null}
@@ -145,11 +141,11 @@ export function Navbar({ scroll }: NavBarProps) {
                                     <div className="flex-1">
                                       <div
                                         className={cn(
-                                          'text-sm font-medium text-slate-400',
-                                          'group-hover:bg-transparent group-hover:text-white',
-                                          'group-focus:bg-transparent group-focus:text-white',
+                                          'text-sm font-medium text-[#4c525c]',
+                                          'group-hover:bg-transparent group-hover:text-[#1f242c]',
+                                          'group-focus:bg-transparent group-focus:text-[#1f242c]',
                                           isSubItemActive &&
-                                            'bg-transparent text-white'
+                                            'bg-transparent text-[#1f242c]'
                                         )}
                                       >
                                         {subItem.title}
@@ -157,11 +153,11 @@ export function Navbar({ scroll }: NavBarProps) {
                                       {subItem.description && (
                                         <div
                                           className={cn(
-                                            'text-sm text-slate-500',
-                                            'group-hover:bg-transparent group-hover:text-slate-300',
-                                            'group-focus:bg-transparent group-focus:text-slate-300',
+                                            'text-sm text-[#7a7f87]',
+                                            'group-hover:bg-transparent group-hover:text-[#4c525c]',
+                                            'group-focus:bg-transparent group-focus:text-[#4c525c]',
                                             isSubItemActive &&
-                                              'bg-transparent text-slate-300'
+                                              'bg-transparent text-[#4c525c]'
                                           )}
                                         >
                                           {subItem.description}
@@ -171,11 +167,11 @@ export function Navbar({ scroll }: NavBarProps) {
                                     {subItem.external && (
                                       <ArrowUpRightIcon
                                         className={cn(
-                                          'size-4 shrink-0 text-slate-500',
-                                          'group-hover:bg-transparent group-hover:text-white',
-                                          'group-focus:bg-transparent group-focus:text-white',
+                                          'size-4 shrink-0 text-[#7a7f87]',
+                                          'group-hover:bg-transparent group-hover:text-[#1f242c]',
+                                          'group-focus:bg-transparent group-focus:text-[#1f242c]',
                                           isSubItemActive &&
-                                            'bg-transparent text-white'
+                                            'bg-transparent text-[#1f242c]'
                                         )}
                                       />
                                     )}
@@ -229,7 +225,7 @@ export function Navbar({ scroll }: NavBarProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="cursor-pointer text-slate-300 hover:text-white hover:bg-white/10"
+                    className="cursor-pointer text-[#4c525c] hover:bg-[#f3f5f8] hover:text-[#1f242c]"
                   >
                     {t('Common.login')}
                   </Button>
@@ -242,7 +238,7 @@ export function Navbar({ scroll }: NavBarProps) {
                       variant: 'default',
                       size: 'sm',
                     }),
-                    "bg-indigo-600 hover:bg-indigo-500 text-white"
+                    'bg-[#1f4b3e] hover:bg-[#1c4237] text-white shadow-none border border-[#1f4b3e]'
                   )}
                 >
                   {t('Common.signUp')}

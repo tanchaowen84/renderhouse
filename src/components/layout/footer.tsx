@@ -18,13 +18,13 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
   const socialLinks = getSocialLinks();
 
   return (
-    <footer className={cn('border-t border-white/5 bg-[#0F1117] text-slate-400', className)}>
+    <footer className={cn('border-t border-[#e6e8ec] bg-[#f5f6f7] text-[#4c525c]', className)}>
       <Container className="px-4">
         <div className="grid grid-cols-2 gap-8 py-16 md:grid-cols-6">
           <div className="flex flex-col items-start col-span-full md:col-span-2">
             <div className="space-y-4">
               {/* logo and name */}
-              <div className="items-center space-x-2 flex text-slate-200">
+              <div className="items-center space-x-2 flex text-[#1f242c]">
                 <Logo />
                 <span className="text-xl font-semibold">
                   {t('Metadata.name')}
@@ -32,7 +32,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
               </div>
 
               {/* tagline */}
-              <p className="text-slate-500 text-base py-2 md:pr-12 leading-relaxed">
+              <p className="text-[#6a707a] text-base py-2 md:pr-12 leading-relaxed">
                 {t('Marketing.footer.tagline')}
               </p>
 
@@ -46,8 +46,8 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
                       target="_blank"
                       rel="noreferrer"
                       aria-label={link.title}
-                      className="border border-white/10 inline-flex h-8 w-8 items-center 
-                          justify-center rounded-full hover:bg-white/10 hover:text-white transition-colors text-slate-400"
+                      className="border border-[#e6e8ec] inline-flex h-8 w-8 items-center 
+                          justify-center rounded-full hover:bg-white hover:text-[#1f242c] transition-colors text-[#6a707a]"
                     >
                       <span className="sr-only">{link.title}</span>
                       {link.icon ? link.icon : null}
@@ -69,7 +69,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
               key={section.title}
               className="col-span-1 md:col-span-1 items-start"
             >
-              <span className="text-sm font-semibold uppercase text-slate-200 tracking-wider">
+              <span className="text-sm font-semibold uppercase text-[#1f242c] tracking-wider">
                 {section.title}
               </span>
               <ul className="mt-4 list-inside space-y-3">
@@ -80,7 +80,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
                         <LocaleLink
                           href={item.href || '#'}
                           target={item.external ? '_blank' : undefined}
-                          className="text-sm text-slate-500 hover:text-indigo-400 transition-colors"
+                          className="text-sm text-[#6a707a] hover:text-[#1f4b3e] transition-colors"
                         >
                           {item.title}
                         </LocaleLink>
@@ -93,9 +93,9 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
         </div>
       </Container>
 
-      <div className="border-t border-white/5 py-8 bg-[#0F1117]">
+      <div className="border-t border-[#e6e8ec] py-8 bg-[#f5f6f7]">
         <Container className="px-4 flex items-center justify-between gap-x-4">
-          <span className="text-slate-600 text-sm">
+          <span className="text-[#7a7f87] text-sm">
             &copy; {new Date().getFullYear()} {t('Metadata.name')} All Rights
             Reserved.
           </span>
