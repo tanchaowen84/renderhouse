@@ -118,10 +118,7 @@ export default async function DashboardPage({ params }: PageProps) {
                     </p>
                   </div>
                   
-                  <div className="mt-4 flex items-center justify-between">
-                    <div className="flex -space-x-2">
-                      <div className="h-6 w-6 rounded-full border border-[#d9dde1] bg-white" />
-                    </div>
+                  <div className="mt-4 flex items-center justify-end">
                     <span className="flex items-center gap-1 text-xs font-medium text-[#1f4b3e] opacity-0 translate-x-2 transition-all group-hover:translate-x-0 group-hover:opacity-100">
                       Open Workspace <ArrowRight className="h-3 w-3" />
                     </span>
