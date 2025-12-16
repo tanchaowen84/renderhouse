@@ -83,12 +83,19 @@
 - More details：一个多行输入框（可折叠），供用户补充材质/氛围/环境要求；不必填写。  
 - 设计原则：少选项、默认好、随时关闭；不强制填写；卡片式选项一眼可点。  
 
-## Implementation Plan (Fal.ai zimage, latest-only)
+## Implementation Plan (Fal.ai Seedream v4 edit, latest-only)
 
-- **模型**：只接入 fal.ai `zimage`，简化为单一推理调用（同步轮询即可，先不做异步回调/队列）。
-- **对话即操作**：左侧纯聊天，无额外按钮。首条消息带原始图 + 可选风格/光线，生成首版；后续直接用自然语言追加修改，模型决定是否再次生成。
-- **工具极简**：仅一个工具 `generate_render(prev_image, prompt, style?, lighting?)`，由 Grok‑4 触发；返回新图 URL 即可覆盖旧版。
+- **模型**：接入 fal.ai `bytedance/seedream/v4/edit`，简化为单一推理调用（订阅/同步拿结果即可，先不做异步队列）。
+- **对话即操作**：左侧纯聊天，无额外按钮。进入工作台时用户已上传原始图（`inputUrl`）；首条消息用文字给出风格/光线需求生成首版，后续直接自然语言追加修改，模型决定是否再次生成。
+- **工具极简**：仅一个工具 `generate_render(current_image, prompt, style?, lighting?, strength?)`，由 Grok‑4.1-fast 触发；始终以“当前最新渲染图”作为输入，生成后覆盖旧版。`strength` 映射 Seedream 的参考强度。
 - **展示策略**：右侧只展示“最新一版”；不做历史回退。
 - **存储策略**：仅保留原始上传 + 最新渲染；新渲染成功后覆盖 DB `outputUrls`，并删除旧渲染文件，失败则保持旧版。
 - **状态流转**：`uploaded → rendering → done/failed`；失败提示错误但不覆盖。
 - **扩展口**：未来若要版本/异步/多模型，再增加工具与历史策略。
+
+### API 对齐
+- fal 模型：`https://fal.ai/models/fal-ai/bytedance/seedream/v4/edit/api`，核心入参 `prompt`、`image_url`、可选 `strength`、`image_size`、`num_inference_steps`、`output_format`；出参 `images[0].url` 为渲染结果。
+- 大模型：OpenRouter `https://openrouter.ai/x-ai/grok-4.1-fast/api` 作为对话模型，持有对话上下文并在需要时调用 `generate_render` 工具。
+
+### 密钥
+- `FAL_API_KEY`、`OPENROUTER_API_KEY` 已放置于 `.env` 供后端调用（仅服务器使用，不暴露前端）。
