@@ -13,7 +13,7 @@ import {
   ZoomOutIcon,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
@@ -33,12 +33,20 @@ interface WorkspaceClientProps {
 type ChatRole = 'user' | 'assistant';
 type ChatMessageStatus = 'loading' | 'done';
 
+interface RenderSpec {
+  shouldRender: boolean;
+  prompt?: string;
+  strength?: number;
+  imageSize?: string;
+}
+
 interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
   status?: ChatMessageStatus;
   imageUrl?: string;
+  renderSpec?: RenderSpec;
 }
 
 function getPrimaryImageUrl(record: any): string | null {
@@ -67,13 +75,7 @@ export function WorkspaceClient({
     getPrimaryImageUrl(initialRecord)
   );
 
-  const mockImages = useMemo(
-    () => ['/blocks/card.png', '/blocks/charts.png', '/blocks/music.png'],
-    []
-  );
-  const mockIndexRef = useRef(0);
-
-  const [isMockRendering, setIsMockRendering] = useState(false);
+  const [isRendering, setIsRendering] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => [
     {
@@ -85,7 +87,6 @@ export function WorkspaceClient({
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const mockTimerRef = useRef<number | null>(null);
 
   // Zoom Controls Ref
   const transformComponentRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -94,18 +95,10 @@ export function WorkspaceClient({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  useEffect(() => {
-    return () => {
-      if (mockTimerRef.current) {
-        window.clearTimeout(mockTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleSend = () => {
+  const handleSend = async () => {
     const content = inputValue.trim();
     if (!content) return;
-    if (isMockRendering) return;
+    if (isRendering) return;
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -123,27 +116,82 @@ export function WorkspaceClient({
 
     setChatMessages((prev) => [...prev, userMessage, assistantMessage]);
     setInputValue('');
-    setIsMockRendering(true);
+    setIsRendering(true);
 
-    mockIndexRef.current = (mockIndexRef.current + 1) % mockImages.length;
-    const nextMockImageUrl = mockImages[mockIndexRef.current];
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            ...chatMessages
+              .filter((m) => m.status !== 'loading')
+              .map((m) => ({ role: m.role, content: m.content })),
+            { role: 'user', content },
+          ],
+          currentImageUrl,
+        }),
+      });
 
-    mockTimerRef.current = window.setTimeout(() => {
+      const data = (await response.json().catch(() => null)) as
+        | {
+            reply?: string;
+            imageUrl?: string;
+            renderSpec?: RenderSpec;
+            error?: string;
+          }
+        | null;
+
+      if (!response.ok || !data?.reply) {
+        const errorMessage = data?.error || 'Failed to generate render';
+        setChatMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? {
+                  ...m,
+                  content: errorMessage,
+                  status: 'done',
+                }
+              : m
+          )
+        );
+        setIsRendering(false);
+        return;
+      }
+
       setChatMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
             ? {
                 ...m,
-                content: 'Done. Here is the latest render.',
+                content: data.reply ?? 'Done.',
                 status: 'done',
-                imageUrl: nextMockImageUrl,
+                imageUrl: data.imageUrl,
+                renderSpec: data.renderSpec,
               }
             : m
         )
       );
-      setCurrentImageUrl(nextMockImageUrl);
-      setIsMockRendering(false);
-    }, 2000);
+      if (data.imageUrl) {
+        setCurrentImageUrl(data.imageUrl);
+      }
+      setIsRendering(false);
+    } catch (error) {
+      setChatMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: 'Network error. Please try again.',
+                status: 'done',
+              }
+            : m
+        )
+      );
+      setIsRendering(false);
+    }
   };
 
   return (
@@ -159,7 +207,7 @@ export function WorkspaceClient({
             </div>
             <div className="flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white px-3 py-1.5 text-[11px] font-medium text-[#4c525c]">
               <MapPinIcon className="size-3.5" />
-              <span>Mock</span>
+              <span>API</span>
             </div>
           </div>
 
@@ -210,7 +258,30 @@ export function WorkspaceClient({
                                 draggable={false}
                               />
                               <div className="px-3 py-2 text-[11px] text-[#6a707a]">
-                                Latest render (mock)
+                                Latest render
+                              </div>
+                            </div>
+                          )}
+
+                          {m.renderSpec?.shouldRender && m.renderSpec.prompt && (
+                            <div className="mt-3 rounded-xl border border-[#e3e6ea] bg-[#fbfcfd] p-3">
+                              <div className="mb-2 text-[11px] font-medium text-[#4c525c]">
+                                Prompt draft
+                              </div>
+                              <pre className="whitespace-pre-wrap break-words rounded-lg bg-white p-3 text-xs text-[#1f242c] shadow-[inset_0_0_0_1px_rgba(227,230,234,1)]">
+                                {m.renderSpec.prompt}
+                              </pre>
+                              <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#6a707a]">
+                                {typeof m.renderSpec.strength === 'number' && (
+                                  <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
+                                    strength: {m.renderSpec.strength}
+                                  </span>
+                                )}
+                                {m.renderSpec.imageSize && (
+                                  <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
+                                    size: {m.renderSpec.imageSize}
+                                  </span>
+                                )}
                               </div>
                             </div>
                           )}
@@ -244,16 +315,16 @@ export function WorkspaceClient({
                   }
                 }}
                 placeholder="Describe changes…"
-                disabled={isMockRendering}
+                disabled={isRendering}
                 rows={1}
                 className="min-h-[44px] max-h-36 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-[#1f242c] placeholder:text-[#9aa1aa] focus:outline-none disabled:opacity-60"
               />
               <button
                 type="submit"
-                disabled={isMockRendering || inputValue.trim().length === 0}
+                disabled={isRendering || inputValue.trim().length === 0}
                 className={cn(
                   'flex h-11 w-11 items-center justify-center rounded-xl border transition',
-                  isMockRendering || inputValue.trim().length === 0
+                  isRendering || inputValue.trim().length === 0
                     ? 'cursor-not-allowed border-[#d9dde1] bg-[#f3f5f8] text-[#9aa1aa]'
                     : 'border-[#1f4b3e] bg-[#1f4b3e] text-white hover:brightness-[1.05] active:brightness-[0.96]'
                 )}
