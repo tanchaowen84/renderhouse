@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import {
   ArrowUpIcon,
   Loader2Icon,
-  MapPinIcon,
   MaximizeIcon,
   MessageCircleIcon,
   SparklesIcon,
@@ -32,6 +31,7 @@ interface WorkspaceClientProps {
 
 type ChatRole = 'user' | 'assistant';
 type ChatMessageStatus = 'loading' | 'done';
+type WorkspaceMode = 'select' | 'render' | 'edit';
 
 type AllowedImageSize =
   | 'square_hd'
@@ -59,6 +59,44 @@ interface ChatMessage {
   renderSpec?: RenderSpec;
 }
 
+type RenderStyle =
+  | 'Modern'
+  | 'Minimal'
+  | 'Nordic'
+  | 'Japanese'
+  | 'American'
+  | 'Mediterranean';
+
+type RenderLighting =
+  | 'Sunrise'
+  | 'Morning'
+  | 'Noon'
+  | 'Afternoon'
+  | 'Sunset'
+  | 'Night';
+
+type RenderCamera = 'Maintain angle' | 'Auto best angle';
+
+const RENDER_STYLES: RenderStyle[] = [
+  'Modern',
+  'Minimal',
+  'Nordic',
+  'Japanese',
+  'American',
+  'Mediterranean',
+];
+
+const RENDER_LIGHTING: RenderLighting[] = [
+  'Sunrise',
+  'Morning',
+  'Noon',
+  'Afternoon',
+  'Sunset',
+  'Night',
+];
+
+const RENDER_CAMERA: RenderCamera[] = ['Maintain angle', 'Auto best angle'];
+
 function getPrimaryImageUrl(record: any): string | null {
   const outputUrls = record?.outputUrls;
 
@@ -77,6 +115,20 @@ function getPrimaryImageUrl(record: any): string | null {
   return null;
 }
 
+function getFirstOutputUrl(record: any): string | null {
+  const outputUrls = record?.outputUrls;
+
+  if (Array.isArray(outputUrls) && typeof outputUrls[0] === 'string') {
+    return outputUrls[0];
+  }
+
+  if (typeof outputUrls === 'string' && outputUrls.length > 0) {
+    return outputUrls;
+  }
+
+  return null;
+}
+
 export function WorkspaceClient({
   initialRecord,
   messages,
@@ -85,6 +137,9 @@ export function WorkspaceClient({
     getPrimaryImageUrl(initialRecord)
   );
 
+  const [mode, setMode] = useState<WorkspaceMode>(() =>
+    getFirstOutputUrl(initialRecord) ? 'edit' : 'select'
+  );
   const [isRendering, setIsRendering] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => [
@@ -95,6 +150,11 @@ export function WorkspaceClient({
         'Tell me what you want to change (e.g. “more modern, sunset lighting”).',
     },
   ]);
+  const [renderStyle, setRenderStyle] = useState<RenderStyle>('Modern');
+  const [renderLighting, setRenderLighting] = useState<RenderLighting>('Noon');
+  const [renderCamera, setRenderCamera] =
+    useState<RenderCamera>('Maintain angle');
+  const [renderDetails, setRenderDetails] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -105,15 +165,14 @@ export function WorkspaceClient({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  const handleSend = async () => {
-    const content = inputValue.trim();
-    if (!content) return;
+  const sendMessage = async (content: string) => {
+    if (!content.trim()) return;
     if (isRendering) return;
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content,
+      content: content.trim(),
     };
 
     const assistantId = crypto.randomUUID();
@@ -125,7 +184,6 @@ export function WorkspaceClient({
     };
 
     setChatMessages((prev) => [...prev, userMessage, assistantMessage]);
-    setInputValue('');
     setIsRendering(true);
 
     try {
@@ -140,7 +198,7 @@ export function WorkspaceClient({
             ...chatMessages
               .filter((m) => m.status !== 'loading')
               .map((m) => ({ role: m.role, content: m.content })),
-            { role: 'user', content },
+            { role: 'user', content: content.trim() },
           ],
           currentImageUrl,
         }),
@@ -205,6 +263,35 @@ export function WorkspaceClient({
     }
   };
 
+  const handleSend = async () => {
+    const content = inputValue.trim();
+    if (!content) return;
+    setInputValue('');
+    await sendMessage(content);
+  };
+
+  const handleRenderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isRendering) return;
+
+    const details = renderDetails.trim();
+    const prompt = [
+      'Create a photorealistic exterior render from the uploaded image.',
+      `Style: ${renderStyle}.`,
+      `Lighting: ${renderLighting}.`,
+      `Camera: ${renderCamera}.`,
+      details ? `Details: ${details}.` : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    setMode('edit');
+    await sendMessage(prompt);
+  };
+
+  const modeLabel =
+    mode === 'edit' ? 'Edit' : mode === 'render' ? 'Render' : 'Start';
+
   return (
     <>
       {/* Tall Floating Sidebar */}
@@ -214,135 +301,310 @@ export function WorkspaceClient({
           <div className="flex items-center justify-between gap-3 border-b border-[#e6e8ec] bg-white px-6 py-4">
             <div className="flex items-center gap-2 text-[#1f242c]">
               <SparklesIcon className="size-5 text-[#6bb4a0]" />
-              <h2 className="text-base font-semibold">AI Assistant</h2>
+              <h2 className="text-base font-semibold">
+                {mode === 'edit' ? 'AI Assistant' : 'Render flow'}
+              </h2>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white px-3 py-1.5 text-[11px] font-medium text-[#4c525c]">
-              <MapPinIcon className="size-3.5" />
-              <span>API</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6bb4a0]" />
+              <span>{modeLabel}</span>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5">
-            <div className="space-y-3">
-              {chatMessages.map((m) => {
-                const isUser = m.role === 'user';
+          {mode === 'select' && (
+            <div className="flex flex-1 flex-col gap-5 p-6">
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-[#1f242c]">
+                  What do you want to do?
+                </h3>
+                <p className="text-sm text-[#6a707a]">
+                  Use your uploaded image to generate a render, or edit it
+                  directly.
+                </p>
+              </div>
 
-                return (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      'flex w-full',
-                      isUser ? 'justify-end' : 'justify-start'
-                    )}
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-[#e3e6ea] bg-white p-5 shadow-[0_14px_32px_rgba(0,0,0,0.05)]">
+                  <h4 className="text-sm font-semibold text-[#1f242c]">
+                    Make a render from this image
+                  </h4>
+                  <p className="mt-1 text-xs text-[#6a707a]">
+                    Generate a photorealistic exterior render.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setMode('render')}
+                    className="mt-4 inline-flex items-center justify-center rounded-full border border-[#1f4b3e] bg-[#1f4b3e] px-4 py-2 text-xs font-semibold text-white transition hover:brightness-[1.05]"
                   >
-                    <div
+                    Start render
+                  </button>
+                </div>
+
+                <div className="rounded-2xl border border-[#e3e6ea] bg-white p-5 shadow-[0_14px_32px_rgba(0,0,0,0.05)]">
+                  <h4 className="text-sm font-semibold text-[#1f242c]">
+                    Edit the image
+                  </h4>
+                  <p className="mt-1 text-xs text-[#6a707a]">
+                    Refine an existing render or photo via chat.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setMode('edit')}
+                    className="mt-4 inline-flex items-center justify-center rounded-full border border-[#d9dde1] bg-white px-4 py-2 text-xs font-semibold text-[#1f242c] transition hover:bg-[#f3f5f8]"
+                  >
+                    Edit image
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {mode === 'render' && (
+            <form
+              onSubmit={handleRenderSubmit}
+              className="flex flex-1 flex-col gap-6 overflow-y-auto p-6"
+            >
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-[#1f242c]">
+                  Render settings
+                </h3>
+                <p className="text-sm text-[#6a707a]">
+                  Choose the essentials. We&apos;ll handle the rest.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6a707a]">
+                  Style
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {RENDER_STYLES.map((style) => (
+                    <button
+                      key={style}
+                      type="button"
+                      onClick={() => setRenderStyle(style)}
                       className={cn(
-                        'max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-[0_10px_24px_rgba(0,0,0,0.06)]',
-                        isUser
-                          ? 'bg-[#1f4b3e] text-white'
-                          : 'border border-[#e3e6ea] bg-white text-[#1f242c]'
+                        'rounded-2xl border px-4 py-3 text-left text-sm font-medium transition',
+                        renderStyle === style
+                          ? 'border-[#1f4b3e] bg-[#f2fbf7] text-[#1f4b3e] shadow-[0_10px_24px_rgba(31,75,62,0.08)]'
+                          : 'border-[#e3e6ea] bg-white text-[#4c525c] hover:border-[#cfd4da] hover:bg-[#f7f9fb]'
                       )}
                     >
-                      <div className="flex items-start gap-2">
-                        {!isUser && (
-                          <MessageCircleIcon className="mt-0.5 size-4 text-[#6bb4a0]" />
+                      {style}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6a707a]">
+                  Lighting
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {RENDER_LIGHTING.map((lighting) => (
+                    <button
+                      key={lighting}
+                      type="button"
+                      onClick={() => setRenderLighting(lighting)}
+                      className={cn(
+                        'rounded-2xl border px-3 py-3 text-center text-sm font-medium transition',
+                        renderLighting === lighting
+                          ? 'border-[#1f4b3e] bg-[#f2fbf7] text-[#1f4b3e] shadow-[0_10px_24px_rgba(31,75,62,0.08)]'
+                          : 'border-[#e3e6ea] bg-white text-[#4c525c] hover:border-[#cfd4da] hover:bg-[#f7f9fb]'
+                      )}
+                    >
+                      {lighting}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6a707a]">
+                  Camera
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {RENDER_CAMERA.map((camera) => (
+                    <button
+                      key={camera}
+                      type="button"
+                      onClick={() => setRenderCamera(camera)}
+                      className={cn(
+                        'rounded-2xl border px-3 py-3 text-center text-sm font-medium transition',
+                        renderCamera === camera
+                          ? 'border-[#1f4b3e] bg-[#f2fbf7] text-[#1f4b3e] shadow-[0_10px_24px_rgba(31,75,62,0.08)]'
+                          : 'border-[#e3e6ea] bg-white text-[#4c525c] hover:border-[#cfd4da] hover:bg-[#f7f9fb]'
+                      )}
+                    >
+                      {camera}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6a707a]">
+                  More details
+                </div>
+                <textarea
+                  value={renderDetails}
+                  onChange={(event) => setRenderDetails(event.target.value)}
+                  placeholder="Materials, environment, mood, neighborhood…"
+                  rows={4}
+                  className="w-full resize-none rounded-2xl border border-[#e3e6ea] bg-white px-4 py-3 text-sm text-[#1f242c] placeholder:text-[#a1a7b0] shadow-[inset_0_0_0_1px_rgba(227,230,234,0.5)] focus:outline-none focus:ring-2 focus:ring-[#1f4b3e]/20"
+                />
+              </div>
+
+              <div className="mt-auto flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setMode('select')}
+                  className="text-xs font-semibold text-[#6a707a] hover:text-[#1f242c]"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={isRendering || !currentImageUrl}
+                  className={cn(
+                    'inline-flex items-center justify-center rounded-full border px-6 py-2 text-xs font-semibold transition',
+                    isRendering || !currentImageUrl
+                      ? 'cursor-not-allowed border-[#d9dde1] bg-[#f3f5f8] text-[#9aa1aa]'
+                      : 'border-[#1f4b3e] bg-[#1f4b3e] text-white hover:brightness-[1.05]'
+                  )}
+                >
+                  Start render
+                </button>
+              </div>
+            </form>
+          )}
+
+          {mode === 'edit' && (
+            <>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-5">
+                <div className="space-y-3">
+                  {chatMessages.map((m) => {
+                    const isUser = m.role === 'user';
+
+                    return (
+                      <div
+                        key={m.id}
+                        className={cn(
+                          'flex w-full',
+                          isUser ? 'justify-end' : 'justify-start'
                         )}
-                        <div className="flex-1">
-                          <p>{m.content}</p>
-
-                          {m.status === 'loading' && (
-                            <div className="mt-2 flex items-center gap-2 text-xs text-[#6a707a]">
-                              <Loader2Icon className="size-3.5 animate-spin" />
-                              <span>Working…</span>
-                            </div>
+                      >
+                        <div
+                          className={cn(
+                            'max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-[0_10px_24px_rgba(0,0,0,0.06)]',
+                            isUser
+                              ? 'bg-[#1f4b3e] text-white'
+                              : 'border border-[#e3e6ea] bg-white text-[#1f242c]'
                           )}
+                        >
+                          <div className="flex items-start gap-2">
+                            {!isUser && (
+                              <MessageCircleIcon className="mt-0.5 size-4 text-[#6bb4a0]" />
+                            )}
+                            <div className="flex-1">
+                              <p>{m.content}</p>
 
-                          {m.imageUrl && (
-                            <div className="mt-3 overflow-hidden rounded-xl border border-[#e3e6ea] bg-white">
-                              <Image
-                                src={m.imageUrl}
-                                alt="Latest render"
-                                width={640}
-                                height={360}
-                                className="h-auto w-full object-cover"
-                                draggable={false}
-                              />
-                              <div className="px-3 py-2 text-[11px] text-[#6a707a]">
-                                Latest render
-                              </div>
-                            </div>
-                          )}
+                              {m.status === 'loading' && (
+                                <div className="mt-2 flex items-center gap-2 text-xs text-[#6a707a]">
+                                  <Loader2Icon className="size-3.5 animate-spin" />
+                                  <span>Working…</span>
+                                </div>
+                              )}
 
-                          {m.renderSpec?.shouldRender && m.renderSpec.prompt && (
-                            <div className="mt-3 rounded-xl border border-[#e3e6ea] bg-[#fbfcfd] p-3">
-                              <div className="mb-2 text-[11px] font-medium text-[#4c525c]">
-                                Prompt draft
-                              </div>
-                              <pre className="whitespace-pre-wrap break-words rounded-lg bg-white p-3 text-xs text-[#1f242c] shadow-[inset_0_0_0_1px_rgba(227,230,234,1)]">
-                                {m.renderSpec.prompt}
-                              </pre>
-                              <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#6a707a]">
-                                {m.renderSpec.imageSize && (
-                                  <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
-                                    size: {m.renderSpec.imageSize}
-                                  </span>
+                              {m.imageUrl && (
+                                <div className="mt-3 overflow-hidden rounded-xl border border-[#e3e6ea] bg-white">
+                                  <Image
+                                    src={m.imageUrl}
+                                    alt="Latest render"
+                                    width={640}
+                                    height={360}
+                                    className="h-auto w-full object-cover"
+                                    draggable={false}
+                                  />
+                                  <div className="px-3 py-2 text-[11px] text-[#6a707a]">
+                                    Latest render
+                                  </div>
+                                </div>
+                              )}
+
+                              {m.renderSpec?.shouldRender &&
+                                m.renderSpec.prompt && (
+                                  <div className="mt-3 rounded-xl border border-[#e3e6ea] bg-[#fbfcfd] p-3">
+                                    <div className="mb-2 text-[11px] font-medium text-[#4c525c]">
+                                      Prompt draft
+                                    </div>
+                                    <pre className="whitespace-pre-wrap break-words rounded-lg bg-white p-3 text-xs text-[#1f242c] shadow-[inset_0_0_0_1px_rgba(227,230,234,1)]">
+                                      {m.renderSpec.prompt}
+                                    </pre>
+                                    <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#6a707a]">
+                                      {m.renderSpec.imageSize && (
+                                        <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
+                                          size: {m.renderSpec.imageSize}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
                                 )}
-                              </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
 
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
 
-          {/* Composer */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="border-t border-[#e6e8ec] bg-white p-4"
-          >
-            <div className="flex items-end gap-2 rounded-2xl border border-[#d9dde1] bg-white p-2">
-              <textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
+              {/* Composer */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
                 }}
-                placeholder="Describe changes…"
-                disabled={isRendering}
-                rows={1}
-                className="min-h-[44px] max-h-36 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-[#1f242c] placeholder:text-[#9aa1aa] focus:outline-none disabled:opacity-60"
-              />
-              <button
-                type="submit"
-                disabled={isRendering || inputValue.trim().length === 0}
-                className={cn(
-                  'flex h-11 w-11 items-center justify-center rounded-xl border transition',
-                  isRendering || inputValue.trim().length === 0
-                    ? 'cursor-not-allowed border-[#d9dde1] bg-[#f3f5f8] text-[#9aa1aa]'
-                    : 'border-[#1f4b3e] bg-[#1f4b3e] text-white hover:brightness-[1.05] active:brightness-[0.96]'
-                )}
-                aria-label="Send message"
+                className="border-t border-[#e6e8ec] bg-white p-4"
               >
-                <ArrowUpIcon className="size-4" />
-              </button>
-            </div>
-            <p className="mt-2 text-[11px] text-[#7a7f87]">
-              Press Enter to send, Shift+Enter for a new line.
-            </p>
-          </form>
+                <div className="flex items-end gap-2 rounded-2xl border border-[#d9dde1] bg-white p-2">
+                  <textarea
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSend();
+                      }
+                    }}
+                    placeholder="Describe changes…"
+                    disabled={isRendering}
+                    rows={1}
+                    className="min-h-[44px] max-h-36 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-[#1f242c] placeholder:text-[#9aa1aa] focus:outline-none disabled:opacity-60"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isRendering || inputValue.trim().length === 0}
+                    className={cn(
+                      'flex h-11 w-11 items-center justify-center rounded-xl border transition',
+                      isRendering || inputValue.trim().length === 0
+                        ? 'cursor-not-allowed border-[#d9dde1] bg-[#f3f5f8] text-[#9aa1aa]'
+                        : 'border-[#1f4b3e] bg-[#1f4b3e] text-white hover:brightness-[1.05] active:brightness-[0.96]'
+                    )}
+                    aria-label="Send message"
+                  >
+                    <ArrowUpIcon className="size-4" />
+                  </button>
+                </div>
+                <p className="mt-2 text-[11px] text-[#7a7f87]">
+                  Press Enter to send, Shift+Enter for a new line.
+                </p>
+              </form>
+            </>
+          )}
         </div>
       </div>
 
