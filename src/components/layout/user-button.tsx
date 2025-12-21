@@ -56,7 +56,7 @@ export function UserButton({ user }: UserButtonProps) {
           className="size-8 border cursor-pointer"
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="z-[200]">
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             <p className="font-medium">{user.name}</p>
