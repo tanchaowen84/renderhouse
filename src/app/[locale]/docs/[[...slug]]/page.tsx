@@ -5,6 +5,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
+import { websiteConfig } from '@/config/website';
 import { LOCALES } from '@/i18n/routing';
 import { source } from '@/lib/docs/source';
 import { constructMetadata } from '@/lib/metadata';
@@ -22,6 +23,10 @@ import { notFound } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 export function generateStaticParams() {
+  if (!websiteConfig.features.enableDocsPage) {
+    return [];
+  }
+
   const slugParams = source.generateParams();
   const params = LOCALES.flatMap((locale) =>
     slugParams.map((param) => ({
@@ -34,6 +39,10 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: DocPageProps) {
+  if (!websiteConfig.features.enableDocsPage) {
+    notFound();
+  }
+
   const { slug, locale } = await params;
   const language = locale as string;
   const page = source.getPage(slug, language);
@@ -76,6 +85,10 @@ interface DocPageProps {
  * https://github.com/fuma-nama/fumadocs/blob/dev/apps/docs/app/docs/%5B...slug%5D/page.tsx
  */
 export default async function DocPage({ params }: DocPageProps) {
+  if (!websiteConfig.features.enableDocsPage) {
+    notFound();
+  }
+
   const { slug, locale } = await params;
   const language = locale as string;
   const page = source.getPage(slug, language);
