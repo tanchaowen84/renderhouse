@@ -4,8 +4,9 @@ import { LocaleLink } from '@/i18n/navigation';
 import { getSession } from '@/lib/server';
 import { Routes } from '@/routes';
 import { desc, eq } from 'drizzle-orm';
-import { ArrowRight, Layers, UploadCloud } from 'lucide-react';
+import { ArrowRight, Layers } from 'lucide-react';
 import { ProjectDeleteButton } from '@/components/dashboard/project-delete-button';
+import { CreateProjectCard } from '@/components/dashboard/create-project-card';
 import type { Locale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
@@ -71,15 +72,7 @@ export default async function DashboardPage({ params }: PageProps) {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {/* New Project Card (Quick Action) */}
-            <LocaleLink
-              href={Routes.Root}
-              className="group relative flex h-full min-h-[260px] flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-[#cfd4da] bg-white p-6 text-[#1f242c] transition hover:border-[#6bb4a0] hover:bg-[#f6faf8]"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d9dde1] bg-white text-[#1f4b3e] transition-transform group-hover:scale-105">
-                <UploadCloud className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-semibold">Create New Project</p>
-            </LocaleLink>
+            <CreateProjectCard />
 
             {projects.map((p) => (
               <div
