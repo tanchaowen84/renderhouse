@@ -106,7 +106,12 @@ export default function HeroSection() {
           </div>
 
           <div className="w-full max-w-xl space-y-3">
-            <div className="flex items-stretch gap-3 rounded-2xl border border-[#d9dde1] bg-white/90 p-4 shadow-[0_18px_45px_rgba(0,0,0,0.06)] backdrop-blur">
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              disabled={isUploading}
+              className="group flex w-full items-stretch gap-3 rounded-2xl border border-[#d9dde1] bg-white/90 p-4 text-left shadow-[0_18px_45px_rgba(0,0,0,0.06)] backdrop-blur transition-all hover:-translate-y-0.5 hover:border-[#cfd4da] hover:shadow-[0_22px_55px_rgba(0,0,0,0.08)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+            >
               <div className="flex-1 space-y-1">
                 <div className="text-[17px] font-semibold text-[#1d2128]">
                   {isUploading ? 'Uploading…' : 'Upload your drawing'}
@@ -116,15 +121,10 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleUploadClick}
-                disabled={isUploading}
-                className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#6bb4a0] text-white transition duration-200 ease-out hover:brightness-[1.07] active:brightness-[0.94] disabled:cursor-not-allowed disabled:opacity-70"
-              >
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#6bb4a0] text-white transition duration-200 ease-out group-hover:brightness-[1.07]">
                 <UploadCloud className="size-5" />
-              </button>
-            </div>
+              </span>
+            </button>
 
             <button
               type="button"
