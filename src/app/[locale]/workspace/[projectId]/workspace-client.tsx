@@ -33,11 +33,21 @@ interface WorkspaceClientProps {
 type ChatRole = 'user' | 'assistant';
 type ChatMessageStatus = 'loading' | 'done';
 
+type AllowedImageSize =
+  | 'square_hd'
+  | 'square'
+  | 'portrait_4_3'
+  | 'portrait_16_9'
+  | 'landscape_4_3'
+  | 'landscape_16_9'
+  | 'auto'
+  | 'auto_2K'
+  | 'auto_4K';
+
 interface RenderSpec {
   shouldRender: boolean;
   prompt?: string;
-  strength?: number;
-  imageSize?: string;
+  imageSize?: AllowedImageSize;
 }
 
 interface ChatMessage {
@@ -125,6 +135,7 @@ export function WorkspaceClient({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          projectId: initialRecord?.id,
           messages: [
             ...chatMessages
               .filter((m) => m.status !== 'loading')
@@ -272,11 +283,6 @@ export function WorkspaceClient({
                                 {m.renderSpec.prompt}
                               </pre>
                               <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#6a707a]">
-                                {typeof m.renderSpec.strength === 'number' && (
-                                  <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
-                                    strength: {m.renderSpec.strength}
-                                  </span>
-                                )}
                                 {m.renderSpec.imageSize && (
                                   <span className="rounded-full border border-[#e3e6ea] bg-white px-2 py-1">
                                     size: {m.renderSpec.imageSize}

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -165,17 +166,12 @@ export class S3Provider implements StorageProvider {
         throw new ConfigurationError('Storage bucket name is not configured');
       }
 
-      const command = {
+      const command = new DeleteObjectCommand({
         Bucket: bucketName,
         Key: key,
-      };
+      });
 
-      await s3.send(
-        new PutObjectCommand({
-          ...command,
-          Body: '',
-        })
-      );
+      await s3.send(command);
     } catch (error) {
       const message =
         error instanceof Error

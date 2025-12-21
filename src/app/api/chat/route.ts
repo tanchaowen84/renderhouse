@@ -1,6 +1,24 @@
 import { NextResponse } from 'next/server';
+import { fal } from '@fal-ai/client';
+import { eq } from 'drizzle-orm';
+import { getDb } from '@/db';
+import { project } from '@/db/schema';
+import { getSession } from '@/lib/server';
+import { deleteFile, uploadFile } from '@/storage';
+
+export const runtime = 'nodejs';
 
 type ChatRole = 'user' | 'assistant';
+type AllowedImageSize =
+  | 'square_hd'
+  | 'square'
+  | 'portrait_4_3'
+  | 'portrait_16_9'
+  | 'landscape_4_3'
+  | 'landscape_16_9'
+  | 'auto'
+  | 'auto_2K'
+  | 'auto_4K';
 
 interface ChatRequestMessage {
   role: ChatRole;
@@ -10,32 +28,41 @@ interface ChatRequestMessage {
 interface RenderSpec {
   shouldRender: boolean;
   prompt?: string;
-  strength?: number;
-  imageSize?: string;
+  imageSize?: AllowedImageSize;
 }
 
 interface ChatRequestBody {
+  projectId?: string;
   messages?: ChatRequestMessage[];
-  currentImageUrl?: string | null;
 }
 
 interface ChatResponseBody {
   reply: string;
   renderSpec: RenderSpec;
+  imageUrl?: string;
 }
 
 /**
- * Stage 2 (UI-testable):
- * - Real AI chat via OpenRouter (Grok-4.1-fast).
- * - Returns a user-facing reply + a structured prompt draft (no image generation yet).
+ * Stage 3:
+ * - AI chat via OpenRouter (Grok-4.1-fast) + image edit via fal Seedream v4 edit.
+ * - Stores only the latest render in R2 and returns the new URL.
  */
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as ChatRequestBody | null;
+  const projectId = body?.projectId;
   const messages = body?.messages;
-  const currentImageUrl = body?.currentImageUrl ?? null;
+
+  if (!projectId || typeof projectId !== 'string') {
+    return NextResponse.json({ error: 'projectId is required' }, { status: 400 });
+  }
 
   if (!Array.isArray(messages) || messages.length === 0) {
-    return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
+    return NextResponse.json({ error: 'messages are required' }, { status: 400 });
+  }
+
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const openRouterApiKey = process.env.OPENROUTER_API_KEY;
@@ -45,6 +72,20 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  const db = await getDb();
+  const record = await db
+    .select()
+    .from(project)
+    .where(eq(project.id, projectId))
+    .limit(1)
+    .then((rows) => rows[0]);
+
+  if (!record || record.userId !== session.user.id) {
+    return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
+
+  const currentImageUrl = getPrimaryImageUrl(record);
 
   const history = messages
     .slice(-20)
@@ -64,7 +105,7 @@ export async function POST(request: Request) {
     'Goal: help the user refine the CURRENT image via iterative edits.',
     'Important: you cannot view the image. Do not claim you can see it. Ask clarifying questions if needed.',
     '',
-    'This stage does NOT generate images. You only respond and produce a prompt draft for a future image-edit step.',
+    'You must decide whether the user message requires generating a new edited image now.',
     '',
     'Return ONLY valid JSON with this exact shape:',
     '{',
@@ -72,15 +113,14 @@ export async function POST(request: Request) {
     '  "renderSpec": {',
     '    "shouldRender": boolean,',
     '    "prompt"?: string,',
-    '    "strength"?: number,',
     '    "imageSize"?: string',
     '  }',
     '}',
     '',
     'Rules:',
-    '- If the user is chatting (e.g. greetings, identity questions), set renderSpec.shouldRender=false and OMIT prompt/strength/imageSize.',
+    '- If the user is chatting (e.g. greetings, identity questions), set renderSpec.shouldRender=false and OMIT prompt/imageSize.',
     '- If the user requests visual changes, set renderSpec.shouldRender=true and provide a clean, concise English prompt for the image edit model.',
-    '- If shouldRender=true, you may include strength (0..1, default 0.6) and imageSize ("auto" by default).',
+    '- If shouldRender=true, include imageSize using one of: square_hd, square, portrait_4_3, portrait_16_9, landscape_4_3, landscape_16_9, auto, auto_2K, auto_4K (default "auto").',
     '- Do not include markdown or extra keys.',
   ].join('\n');
 
@@ -141,24 +181,119 @@ export async function POST(request: Request) {
     shouldRender && typeof renderSpecInput.prompt === 'string'
       ? renderSpecInput.prompt
       : undefined;
-  const strength =
-    shouldRender && typeof renderSpecInput.strength === 'number'
-      ? renderSpecInput.strength
-      : undefined;
-  const imageSize =
+  const imageSize = normalizeImageSize(
     shouldRender && typeof renderSpecInput.imageSize === 'string'
       ? renderSpecInput.imageSize
-      : undefined;
+      : undefined
+  );
 
-  return NextResponse.json({
-    reply,
-    renderSpec: {
-      shouldRender,
-      ...(prompt ? { prompt } : {}),
-      ...(typeof strength === 'number' ? { strength } : {}),
-      ...(imageSize ? { imageSize } : {}),
-    },
-  } satisfies ChatResponseBody);
+  // If the model suggests rendering but we don't have a prompt or a base image,
+  // fall back to a reply-only message (still returns the structured output for UI).
+  if (shouldRender && (!prompt || !currentImageUrl)) {
+    return NextResponse.json({
+      reply,
+      renderSpec: {
+        shouldRender: Boolean(prompt && currentImageUrl),
+        ...(prompt ? { prompt } : {}),
+        ...(imageSize ? { imageSize } : {}),
+      },
+    } satisfies ChatResponseBody);
+  }
+
+  if (!shouldRender) {
+    return NextResponse.json({
+      reply,
+      renderSpec: { shouldRender: false },
+    } satisfies ChatResponseBody);
+  }
+
+  const promptText = prompt;
+  const baseImageUrl = currentImageUrl;
+  if (!promptText || !baseImageUrl) {
+    return NextResponse.json(
+      { error: 'Missing prompt or image for rendering' },
+      { status: 400 }
+    );
+  }
+
+  const falApiKey = process.env.FAL_API_KEY;
+  if (!falApiKey) {
+    return NextResponse.json(
+      { error: 'FAL_API_KEY is not configured' },
+      { status: 500 }
+    );
+  }
+
+  // Update status → rendering (best-effort).
+  await db
+    .update(project)
+    .set({ status: 'rendering', updatedAt: new Date() })
+    .where(eq(project.id, projectId));
+
+  try {
+    fal.config({ credentials: falApiKey });
+
+    const result = await fal.subscribe('fal-ai/bytedance/seedream/v4/edit', {
+      input: {
+        prompt: promptText,
+        image_urls: [baseImageUrl],
+        image_size: imageSize ?? 'auto',
+        num_images: 1,
+        max_images: 1,
+      },
+    });
+
+    const generatedUrl = (result as any)?.data?.images?.[0]?.url as
+      | string
+      | undefined;
+    if (!generatedUrl) {
+      throw new Error('No image URL returned from Seedream');
+    }
+
+    const uploaded = await uploadRemoteImageToR2({
+      url: generatedUrl,
+      folder: `renders/${projectId}`,
+    });
+
+    const previousOutputUrl = getFirstOutputUrl(record);
+
+    await db
+      .update(project)
+      .set({
+        outputUrls: [uploaded.url],
+        status: 'done',
+        updatedAt: new Date(),
+      })
+      .where(eq(project.id, projectId));
+
+    // Best-effort cleanup of previous render file (do not block success response).
+    if (previousOutputUrl && previousOutputUrl !== uploaded.url) {
+      const key = tryGetStorageKeyFromPublicUrl(previousOutputUrl);
+      if (key) {
+        await deleteFile(key).catch(() => undefined);
+      }
+    }
+
+    return NextResponse.json({
+      reply,
+      renderSpec: {
+        shouldRender: true,
+        ...(prompt ? { prompt } : {}),
+        ...(imageSize ? { imageSize } : {}),
+      },
+      imageUrl: uploaded.url,
+    } satisfies ChatResponseBody);
+  } catch (error) {
+    await db
+      .update(project)
+      .set({ status: 'failed', updatedAt: new Date() })
+      .where(eq(project.id, projectId));
+
+    const message =
+      error instanceof Error ? error.message : 'Failed to generate render';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+
 }
 
 function safeParseJson(input: string): any | null {
@@ -174,5 +309,83 @@ function safeParseJson(input: string): any | null {
     } catch {
       return null;
     }
+  }
+}
+
+function getPrimaryImageUrl(record: any): string | null {
+  const outputUrl = getFirstOutputUrl(record);
+  if (outputUrl) return outputUrl;
+
+  const inputUrl = record?.inputUrl;
+  if (typeof inputUrl === 'string' && inputUrl.length > 0) return inputUrl;
+
+  return null;
+}
+
+function getFirstOutputUrl(record: any): string | null {
+  const outputUrls = record?.outputUrls;
+
+  if (Array.isArray(outputUrls) && typeof outputUrls[0] === 'string') {
+    return outputUrls[0];
+  }
+
+  if (typeof outputUrls === 'string' && outputUrls.length > 0) {
+    return outputUrls;
+  }
+
+  return null;
+}
+
+function normalizeImageSize(value?: string): AllowedImageSize | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  const allowed = new Set([
+    'square_hd',
+    'square',
+    'portrait_4_3',
+    'portrait_16_9',
+    'landscape_4_3',
+    'landscape_16_9',
+    'auto',
+    'auto_2K',
+    'auto_4K',
+  ]);
+
+  return allowed.has(trimmed) ? (trimmed as AllowedImageSize) : 'auto';
+}
+
+async function uploadRemoteImageToR2(params: { url: string; folder: string }) {
+  const response = await fetch(params.url);
+  if (!response.ok) {
+    throw new Error('Failed to download generated image');
+  }
+
+  const contentType = response.headers.get('content-type') || 'image/png';
+  const fileBuffer = Buffer.from(await response.arrayBuffer());
+  const extension = getImageExtensionFromContentType(contentType);
+
+  return uploadFile(fileBuffer, `render.${extension}`, contentType, params.folder);
+}
+
+function getImageExtensionFromContentType(contentType: string): string {
+  const normalized = contentType.split(';')[0]?.trim().toLowerCase();
+  if (normalized === 'image/jpeg') return 'jpg';
+  if (normalized === 'image/webp') return 'webp';
+  if (normalized === 'image/png') return 'png';
+  return 'png';
+}
+
+function tryGetStorageKeyFromPublicUrl(url: string): string | null {
+  const publicUrl = process.env.STORAGE_PUBLIC_URL;
+  if (!publicUrl) return null;
+
+  try {
+    const publicUrlObj = new URL(publicUrl);
+    const urlObj = new URL(url);
+
+    if (urlObj.origin !== publicUrlObj.origin) return null;
+    return urlObj.pathname.replace(/^\//, '') || null;
+  } catch {
+    return null;
   }
 }
