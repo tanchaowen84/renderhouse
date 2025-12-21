@@ -196,6 +196,7 @@
     "login": {
       "title": "Login",
       "welcomeBack": "Welcome back",
+      "socialOnly": "Use Google or GitHub to sign in—fast and secure.",
       "email": "Email",
       "password": "Password",
       "signIn": "Sign In",
@@ -212,6 +213,7 @@
     "register": {
       "title": "Register",
       "createAccount": "Create an account",
+      "socialOnly": "Create your account with Google or GitHub.",
       "name": "Name",
       "email": "Email",
       "password": "Password",
