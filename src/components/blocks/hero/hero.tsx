@@ -2,7 +2,7 @@
 
 import { createProjectAction } from '@/actions/create-project';
 import { uploadFileFromBrowser } from '@/storage';
-import { CloudUpload, MoveRight, Sparkles, UploadCloud } from 'lucide-react';
+import { CloudUpload, Sparkles, UploadCloud } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -126,14 +126,6 @@ export default function HeroSection() {
               </span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => router.push('#examples')}
-              className="group inline-flex items-center gap-1 text-sm font-medium text-[#1f4b3e]"
-            >
-              View sample outputs
-              <MoveRight className="size-4 transition-transform duration-150 group-hover:translate-x-0.5" />
-            </button>
           </div>
 
           <input
