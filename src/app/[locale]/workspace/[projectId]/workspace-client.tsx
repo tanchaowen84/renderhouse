@@ -12,7 +12,7 @@ import {
   ZoomOutIcon,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { type FormEvent, useEffect, useRef, useState } from 'react';
 import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
@@ -270,7 +270,7 @@ export function WorkspaceClient({
     await sendMessage(content);
   };
 
-  const handleRenderSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleRenderSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isRendering) return;
 
@@ -290,7 +290,13 @@ export function WorkspaceClient({
   };
 
   const modeLabel =
-    mode === 'edit' ? 'Edit' : mode === 'render' ? 'Render' : 'Start';
+    mode === 'edit' ? 'Edit' : mode === 'render' ? 'Render' : 'Choose';
+  const headerTitle =
+    mode === 'edit'
+      ? 'AI Assistant'
+      : mode === 'render'
+        ? 'Render settings'
+        : 'Choose mode';
 
   return (
     <>
@@ -301,13 +307,22 @@ export function WorkspaceClient({
           <div className="flex items-center justify-between gap-3 border-b border-[#e6e8ec] bg-white px-6 py-4">
             <div className="flex items-center gap-2 text-[#1f242c]">
               <SparklesIcon className="size-5 text-[#6bb4a0]" />
-              <h2 className="text-base font-semibold">
-                {mode === 'edit' ? 'AI Assistant' : 'Render flow'}
-              </h2>
+              <h2 className="text-base font-semibold">{headerTitle}</h2>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white px-3 py-1.5 text-[11px] font-medium text-[#4c525c]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#6bb4a0]" />
-              <span>{modeLabel}</span>
+            <div className="flex items-center gap-2">
+              {mode !== 'select' && (
+                <button
+                  type="button"
+                  onClick={() => setMode('select')}
+                  className="text-[11px] font-semibold text-[#6a707a] transition hover:text-[#1f242c]"
+                >
+                  Switch
+                </button>
+              )}
+              <div className="flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white px-3 py-1.5 text-[11px] font-medium text-[#4c525c]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#6bb4a0]" />
+                <span>{modeLabel}</span>
+              </div>
             </div>
           </div>
 

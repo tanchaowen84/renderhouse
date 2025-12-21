@@ -5,6 +5,7 @@ import { getSession } from '@/lib/server';
 import { Routes } from '@/routes';
 import { desc, eq } from 'drizzle-orm';
 import { ArrowRight, Layers, UploadCloud } from 'lucide-react';
+import { ProjectDeleteButton } from '@/components/dashboard/project-delete-button';
 import type { Locale } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
@@ -101,9 +102,15 @@ export default async function DashboardPage({ params }: PageProps) {
                       <Layers className="h-8 w-8 opacity-50" />
                     </div>
                   )}
-                  {/* Status Badge */}
-                  <div className="absolute top-3 right-3 rounded-full border border-[#d9dde1] bg-white/85 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#4c525c]">
-                    {p.status}
+                  {/* Status Badge + Actions */}
+                  <div className="absolute top-3 right-3 flex items-center gap-2">
+                    <div className="rounded-full border border-[#d9dde1] bg-white/85 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#4c525c]">
+                      {p.status}
+                    </div>
+                    <ProjectDeleteButton
+                      projectId={p.id}
+                      projectTitle={p.title}
+                    />
                   </div>
                 </div>
 
