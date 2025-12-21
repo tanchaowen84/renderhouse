@@ -82,56 +82,60 @@ export default async function DashboardPage({ params }: PageProps) {
             </LocaleLink>
 
             {projects.map((p) => (
-              <LocaleLink
+              <div
                 key={p.id}
-                href={`/workspace/${p.id}`}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-[#e0e4ea] bg-white shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-all hover:-translate-y-1.5 hover:shadow-[0_26px_70px_rgba(0,0,0,0.1)]"
+                className="relative"
               >
-                {/* Image Area */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f0f2f5]">
-                  {p.inputUrl ? (
-                    <Image
-                      src={p.inputUrl}
-                      alt={p.title ?? 'Project'}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width:768px) 100vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-[#b3bac3]">
-                      <Layers className="h-8 w-8 opacity-50" />
-                    </div>
-                  )}
-                  {/* Status Badge + Actions */}
-                  <div className="absolute top-3 right-3 flex items-center gap-2">
-                    <div className="rounded-full border border-[#d9dde1] bg-white/85 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#4c525c]">
-                      {p.status}
-                    </div>
-                    <ProjectDeleteButton
-                      projectId={p.id}
-                      projectTitle={p.title}
-                    />
+                <LocaleLink
+                  href={`/workspace/${p.id}`}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-[#e0e4ea] bg-white shadow-[0_18px_45px_rgba(0,0,0,0.07)] transition-all hover:-translate-y-1.5 hover:shadow-[0_26px_70px_rgba(0,0,0,0.1)]"
+                >
+                  {/* Image Area */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f0f2f5]">
+                    {p.inputUrl ? (
+                      <Image
+                        src={p.inputUrl}
+                        alt={p.title ?? 'Project'}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width:768px) 100vw, 33vw"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-[#b3bac3]">
+                        <Layers className="h-8 w-8 opacity-50" />
+                      </div>
+                    )}
                   </div>
-                </div>
 
-                {/* Content Area */}
-                <div className="flex flex-1 flex-col justify-between p-5">
-                  <div className="space-y-1">
-                    <h3 className="text-base font-semibold text-[#1f242c] line-clamp-1 transition-colors group-hover:text-[#1f4b3e]">
-                      {p.title || 'Untitled Project'}
-                    </h3>
-                    <p className="text-xs text-[#6a707a]">
-                      Last edited {new Date(p.createdAt).toLocaleDateString()}
-                    </p>
+                  {/* Content Area */}
+                  <div className="flex flex-1 flex-col justify-between p-5">
+                    <div className="space-y-1">
+                      <h3 className="text-base font-semibold text-[#1f242c] line-clamp-1 transition-colors group-hover:text-[#1f4b3e]">
+                        {p.title || 'Untitled Project'}
+                      </h3>
+                      <p className="text-xs text-[#6a707a]">
+                        Last edited {new Date(p.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-end">
+                      <span className="flex items-center gap-1 text-xs font-medium text-[#1f4b3e] opacity-0 translate-x-2 transition-all group-hover:translate-x-0 group-hover:opacity-100">
+                        Open Workspace <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
                   </div>
-                  
-                  <div className="mt-4 flex items-center justify-end">
-                    <span className="flex items-center gap-1 text-xs font-medium text-[#1f4b3e] opacity-0 translate-x-2 transition-all group-hover:translate-x-0 group-hover:opacity-100">
-                      Open Workspace <ArrowRight className="h-3 w-3" />
-                    </span>
+                </LocaleLink>
+
+                <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+                  <div className="rounded-full border border-[#d9dde1] bg-white/85 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#4c525c]">
+                    {p.status}
                   </div>
+                  <ProjectDeleteButton
+                    projectId={p.id}
+                    projectTitle={p.title}
+                  />
                 </div>
-              </LocaleLink>
+              </div>
             ))}
           </div>
         )}
