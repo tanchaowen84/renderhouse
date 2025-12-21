@@ -2,9 +2,21 @@ import { NextResponse } from 'next/server';
 import { fal } from '@fal-ai/client';
 import { eq } from 'drizzle-orm';
 import { getDb } from '@/db';
-import { project } from '@/db/schema';
+import { project, user } from '@/db/schema';
 import { getSession } from '@/lib/server';
+import {
+  CHAT_CREDIT_UNITS,
+  MINIMUM_CREDITS_UNITS,
+  RENDER_CREDIT_UNITS,
+  creditsToUnits,
+} from '@/lib/credits';
+import { findPlanByPriceId } from '@/lib/price-plan';
 import { deleteFile, uploadFile } from '@/storage';
+import {
+  getUserActiveSubscription,
+  setMonthlyCreditsForUser,
+  useUserCredits,
+} from '@/utils/drizzle/creem-operations';
 
 export const runtime = 'nodejs';
 
@@ -40,6 +52,8 @@ interface ChatResponseBody {
   reply: string;
   renderSpec: RenderSpec;
   imageUrl?: string;
+  credits?: number;
+  code?: string;
 }
 
 /**
@@ -83,6 +97,18 @@ export async function POST(request: Request) {
 
   if (!record || record.userId !== session.user.id) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+  }
+
+  const currentCredits = await ensureMonthlyFreeCredits(db, session.user.id);
+  if (currentCredits < MINIMUM_CREDITS_UNITS) {
+    return NextResponse.json(
+      {
+        error: 'Insufficient credits',
+        code: 'INSUFFICIENT_CREDITS',
+        credits: currentCredits,
+      },
+      { status: 402 }
+    );
   }
 
   const currentImageUrl = getPrimaryImageUrl(record);
@@ -165,10 +191,31 @@ export async function POST(request: Request) {
 
   const parsed = safeParseJson(content);
   if (!parsed) {
+    let creditsAfterCharge = currentCredits;
+    try {
+      creditsAfterCharge = await chargeCredits(
+        db,
+        session.user.id,
+        CHAT_CREDIT_UNITS
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'InsufficientCreditsError') {
+        return NextResponse.json(
+          {
+            error: 'Insufficient credits',
+            code: 'INSUFFICIENT_CREDITS',
+            credits: currentCredits,
+          },
+          { status: 402 }
+        );
+      }
+      throw error;
+    }
     return NextResponse.json(
       {
         reply: content.trim(),
         renderSpec: { shouldRender: false },
+        credits: creditsAfterCharge,
       } satisfies ChatResponseBody,
       { status: 200 }
     );
@@ -190,6 +237,26 @@ export async function POST(request: Request) {
   // If the model suggests rendering but we don't have a prompt or a base image,
   // fall back to a reply-only message (still returns the structured output for UI).
   if (shouldRender && (!prompt || !currentImageUrl)) {
+    let creditsAfterCharge = currentCredits;
+    try {
+      creditsAfterCharge = await chargeCredits(
+        db,
+        session.user.id,
+        CHAT_CREDIT_UNITS
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'InsufficientCreditsError') {
+        return NextResponse.json(
+          {
+            error: 'Insufficient credits',
+            code: 'INSUFFICIENT_CREDITS',
+            credits: currentCredits,
+          },
+          { status: 402 }
+        );
+      }
+      throw error;
+    }
     return NextResponse.json({
       reply,
       renderSpec: {
@@ -197,13 +264,35 @@ export async function POST(request: Request) {
         ...(prompt ? { prompt } : {}),
         ...(imageSize ? { imageSize } : {}),
       },
+      credits: creditsAfterCharge,
     } satisfies ChatResponseBody);
   }
 
   if (!shouldRender) {
+    let creditsAfterCharge = currentCredits;
+    try {
+      creditsAfterCharge = await chargeCredits(
+        db,
+        session.user.id,
+        CHAT_CREDIT_UNITS
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'InsufficientCreditsError') {
+        return NextResponse.json(
+          {
+            error: 'Insufficient credits',
+            code: 'INSUFFICIENT_CREDITS',
+            credits: currentCredits,
+          },
+          { status: 402 }
+        );
+      }
+      throw error;
+    }
     return NextResponse.json({
       reply,
       renderSpec: { shouldRender: false },
+      credits: creditsAfterCharge,
     } satisfies ChatResponseBody);
   }
 
@@ -214,6 +303,39 @@ export async function POST(request: Request) {
       { error: 'Missing prompt or image for rendering' },
       { status: 400 }
     );
+  }
+
+  const requiredUnits = CHAT_CREDIT_UNITS + RENDER_CREDIT_UNITS;
+  if (currentCredits < requiredUnits) {
+    return NextResponse.json(
+      {
+        error: 'Insufficient credits',
+        code: 'INSUFFICIENT_CREDITS',
+        credits: currentCredits,
+      },
+      { status: 402 }
+    );
+  }
+
+  let creditsAfterCharge = currentCredits;
+  try {
+    creditsAfterCharge = await chargeCredits(
+      db,
+      session.user.id,
+      requiredUnits
+    );
+  } catch (error) {
+    if (error instanceof Error && error.name === 'InsufficientCreditsError') {
+      return NextResponse.json(
+        {
+          error: 'Insufficient credits',
+          code: 'INSUFFICIENT_CREDITS',
+          credits: currentCredits,
+        },
+        { status: 402 }
+      );
+    }
+    throw error;
   }
 
   const falApiKey = process.env.FAL_API_KEY;
@@ -282,6 +404,7 @@ export async function POST(request: Request) {
         ...(imageSize ? { imageSize } : {}),
       },
       imageUrl: uploaded.url,
+      credits: creditsAfterCharge,
     } satisfies ChatResponseBody);
   } catch (error) {
     await db
@@ -291,7 +414,10 @@ export async function POST(request: Request) {
 
     const message =
       error instanceof Error ? error.message : 'Failed to generate render';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: message, credits: creditsAfterCharge },
+      { status: 500 }
+    );
   }
 
 }
@@ -388,4 +514,80 @@ function tryGetStorageKeyFromPublicUrl(url: string): string | null {
   } catch {
     return null;
   }
+}
+
+async function ensureMonthlyFreeCredits(db: any, userId: string): Promise<number> {
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const record = await db
+    .select({ credits: user.credits, metadata: user.metadata })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1);
+
+  if (!record.length) return 0;
+
+  const metadata = (record[0].metadata ?? {}) as Record<string, any>;
+  const creditBalances = metadata.creditBalances as Record<string, any> | undefined;
+  const monthlyKey =
+    typeof creditBalances?.monthlyKey === 'string'
+      ? creditBalances.monthlyKey
+      : undefined;
+  const monthlySource =
+    creditBalances?.monthlySource === 'free' ||
+    creditBalances?.monthlySource === 'subscription'
+      ? creditBalances.monthlySource
+      : undefined;
+
+  const legacyFreeMonth =
+    typeof metadata.freeCreditsMonth === 'string'
+      ? metadata.freeCreditsMonth
+      : undefined;
+
+  const hasMonthlyThisMonth =
+    monthlyKey === monthKey &&
+    (monthlySource === 'free' || monthlySource === 'subscription');
+
+  const activeSubscription = await getUserActiveSubscription(userId);
+  if (activeSubscription) {
+    const plan = findPlanByPriceId(activeSubscription.priceId);
+    const planCredits = plan?.credits ?? 0;
+    const monthlyCreditsUnits = planCredits ? creditsToUnits(planCredits) : 0;
+
+    if (
+      monthlyCreditsUnits > 0 &&
+      (!hasMonthlyThisMonth || monthlySource !== 'subscription')
+    ) {
+      const newCredits = await db.transaction(async (tx: any) => {
+        return setMonthlyCreditsForUser(tx, userId, monthlyCreditsUnits, {
+          monthlyKey: monthKey,
+          monthlySource: 'subscription',
+          description: `Subscription credits (${planCredits})`,
+        });
+      });
+      return newCredits;
+    }
+
+    return record[0].credits ?? 0;
+  }
+
+  if (hasMonthlyThisMonth || legacyFreeMonth === monthKey) {
+    return record[0].credits ?? 0;
+  }
+
+  const monthlyCreditsUnits = creditsToUnits(3);
+  const newCredits = await db.transaction(async (tx: any) => {
+    return setMonthlyCreditsForUser(tx, userId, monthlyCreditsUnits, {
+      monthlyKey: monthKey,
+      monthlySource: 'free',
+      description: `Monthly free credits (${monthKey})`,
+    });
+  });
+
+  return newCredits;
+}
+
+async function chargeCredits(db: any, userId: string, units: number): Promise<number> {
+  return db.transaction(async (tx: any) => {
+    return useUserCredits(tx, userId, units, `Used ${units} credit units`);
+  });
 }

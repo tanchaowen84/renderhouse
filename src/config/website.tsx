@@ -92,59 +92,44 @@ export const websiteConfig: WebsiteConfig = {
         prices: [],
         isFree: true,
         isLifetime: false,
+        credits: 3,
       },
-      // ========== Stripe Configuration (Commented Out) ==========
-      // pro: {
-      //   id: 'pro',
-      //   prices: [
-      //     {
-      //       type: PaymentTypes.SUBSCRIPTION,
-      //       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY!,
-      //       amount: 990,
-      //       currency: 'USD',
-      //       interval: PlanIntervals.MONTH,
-      //     },
-      //     {
-      //       type: PaymentTypes.SUBSCRIPTION,
-      //       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_YEARLY!,
-      //       amount: 9900,
-      //       currency: 'USD',
-      //       interval: PlanIntervals.YEAR,
-      //     },
-      //   ],
-      //   isFree: false,
-      //   isLifetime: false,
-      //   recommended: true,
-      // },
-      // lifetime: {
-      //   id: 'lifetime',
-      //   prices: [
-      //     {
-      //       type: PaymentTypes.ONE_TIME,
-      //       priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_LIFETIME!,
-      //       amount: 19900,
-      //       currency: 'USD',
-      //     },
-      //   ],
-      //   isFree: false,
-      //   isLifetime: true,
-      // },
-
-      // ========== Creem Configuration ==========
+      starter: {
+        id: 'starter',
+        prices: [
+          {
+            type: PaymentTypes.SUBSCRIPTION,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_STARTER_MONTHLY!,
+            amount: 900,
+            currency: 'USD',
+            interval: PlanIntervals.MONTH,
+          },
+          {
+            type: PaymentTypes.SUBSCRIPTION,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_STARTER_YEARLY!,
+            amount: 8400,
+            currency: 'USD',
+            interval: PlanIntervals.YEAR,
+          },
+        ],
+        isFree: false,
+        isLifetime: false,
+        credits: 60,
+      },
       pro: {
         id: 'pro',
         prices: [
           {
             type: PaymentTypes.SUBSCRIPTION,
             priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PRO_MONTHLY!,
-            amount: 990,
+            amount: 1900,
             currency: 'USD',
             interval: PlanIntervals.MONTH,
           },
           {
             type: PaymentTypes.SUBSCRIPTION,
             priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PRO_YEARLY!,
-            amount: 9900,
+            amount: 18000,
             currency: 'USD',
             interval: PlanIntervals.YEAR,
           },
@@ -152,19 +137,71 @@ export const websiteConfig: WebsiteConfig = {
         isFree: false,
         isLifetime: false,
         recommended: true,
+        credits: 200,
       },
-      lifetime: {
-        id: 'lifetime',
+      studio: {
+        id: 'studio',
+        prices: [
+          {
+            type: PaymentTypes.SUBSCRIPTION,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_STUDIO_MONTHLY!,
+            amount: 4900,
+            currency: 'USD',
+            interval: PlanIntervals.MONTH,
+          },
+          {
+            type: PaymentTypes.SUBSCRIPTION,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_STUDIO_YEARLY!,
+            amount: 46800,
+            currency: 'USD',
+            interval: PlanIntervals.YEAR,
+          },
+        ],
+        isFree: false,
+        isLifetime: false,
+        credits: 700,
+      },
+      pack60: {
+        id: 'pack60',
         prices: [
           {
             type: PaymentTypes.ONE_TIME,
-            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_LIFETIME!,
-            amount: 19900,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PACK_60!,
+            amount: 900,
             currency: 'USD',
           },
         ],
         isFree: false,
-        isLifetime: true,
+        isLifetime: false,
+        credits: 60,
+      },
+      pack200: {
+        id: 'pack200',
+        prices: [
+          {
+            type: PaymentTypes.ONE_TIME,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PACK_200!,
+            amount: 1900,
+            currency: 'USD',
+          },
+        ],
+        isFree: false,
+        isLifetime: false,
+        credits: 200,
+      },
+      pack700: {
+        id: 'pack700',
+        prices: [
+          {
+            type: PaymentTypes.ONE_TIME,
+            priceId: process.env.NEXT_PUBLIC_CREEM_PRODUCT_ID_PACK_700!,
+            amount: 4900,
+            currency: 'USD',
+          },
+        ],
+        isFree: false,
+        isLifetime: false,
+        credits: 700,
       },
     },
   },

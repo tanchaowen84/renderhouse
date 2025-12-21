@@ -2,6 +2,7 @@
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { getPricePlans } from '@/config/price-config';
+import { usePayment } from '@/hooks/use-payment';
 import { cn } from '@/lib/utils';
 import {
   PaymentTypes,
@@ -17,6 +18,7 @@ interface PricingTableProps {
   metadata?: Record<string, string>;
   currentPlan?: PricePlan | null;
   className?: string;
+  showFreePlan?: boolean;
 }
 
 /**
@@ -31,8 +33,11 @@ export function PricingTable({
   metadata,
   currentPlan,
   className,
+  showFreePlan = false,
 }: PricingTableProps) {
   const t = useTranslations('PricingPage');
+  const { subscription } = usePayment();
+  const canPurchasePacks = Boolean(subscription);
   const [interval, setInterval] = useState<PlanInterval>(PlanIntervals.MONTH);
 
   // Get price plans with translations
@@ -43,7 +48,9 @@ export function PricingTable({
   const currentPlanId = currentPlan?.id || null;
 
   // Filter plans into free, subscription and one-time plans
-  const freePlans = plans.filter((plan) => plan.isFree && !plan.disabled);
+  const freePlans = showFreePlan
+    ? plans.filter((plan) => plan.isFree && !plan.disabled)
+    : [];
 
   const subscriptionPlans = plans.filter(
     (plan) =>
@@ -170,6 +177,7 @@ export function PricingTable({
                 paymentType={PaymentTypes.ONE_TIME}
                 metadata={metadata}
                 isCurrentPlan={currentPlanId === plan.id}
+                canPurchasePacks={canPurchasePacks}
               />
             ))}
           </div>

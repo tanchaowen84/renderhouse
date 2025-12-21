@@ -1,5 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { desc, eq } from 'drizzle-orm';
+import { creditsToUnits } from '@/lib/credits';
+import { findPlanByPriceId } from '@/lib/price-plan';
 import { getDb } from '../../db';
 import { payment, user } from '../../db/schema';
 import {
@@ -8,6 +10,7 @@ import {
   addCreditsToUser,
   createOrUpdatePaymentFromCreemOrder,
   createOrUpdatePaymentFromCreemSubscription,
+  setMonthlyCreditsForUser,
   updateUserFromCreemCustomer,
 } from '../../utils/drizzle/creem-operations';
 import type {
@@ -527,7 +530,7 @@ export class CreemProvider implements PaymentProvider {
           await addCreditsToUser(
             tx,
             userId,
-            creditsAmount,
+            creditsToUnits(creditsAmount),
             order.id,
             `Credits purchase from order ${order.id}`
           );
@@ -555,7 +558,7 @@ export class CreemProvider implements PaymentProvider {
         await addCreditsToUser(
           tx,
           userId,
-          creditsAmount,
+          creditsToUnits(creditsAmount),
           checkout.order.id,
           `Purchased ${creditsAmount} credits`
         );
@@ -621,6 +624,62 @@ export class CreemProvider implements PaymentProvider {
       userId,
       event.eventType
     );
+
+    const priceId =
+      typeof subscription.product === 'string'
+        ? subscription.product
+        : subscription.product.id;
+    let credits = Number(subscription.metadata?.credits ?? 0);
+
+    if (!credits && typeof subscription.product === 'object') {
+      credits = Number(subscription.product.metadata?.credits ?? 0);
+    }
+
+    if (!credits) {
+      const plan = findPlanByPriceId(priceId);
+      credits = plan?.credits ?? 0;
+    }
+
+    if (credits > 0) {
+      const periodKey =
+        subscription.current_period_start_date ||
+        subscription.updated_at ||
+        new Date().toISOString();
+      const creditMarker = `${subscription.id}:${periodKey}`;
+      const periodDate = new Date(periodKey);
+      const monthlyKey = Number.isNaN(periodDate.getTime())
+        ? new Date().toISOString().slice(0, 7)
+        : periodDate.toISOString().slice(0, 7);
+
+      const userRecord = await tx
+        .select({ metadata: user.metadata })
+        .from(user)
+        .where(eq(user.id, userId))
+        .limit(1);
+
+      const metadata = (userRecord[0]?.metadata ?? {}) as Record<string, any>;
+      if (metadata.subscriptionCreditsPeriod !== creditMarker) {
+        await setMonthlyCreditsForUser(
+          tx,
+          userId,
+          creditsToUnits(credits),
+          {
+            monthlyKey,
+            monthlySource: 'subscription',
+            description: `Subscription credits (${credits})`,
+            creemOrderId: subscription.id,
+          }
+        );
+
+        await tx
+          .update(user)
+          .set({
+            metadata: { ...metadata, subscriptionCreditsPeriod: creditMarker },
+            updatedAt: new Date(),
+          } as any)
+          .where(eq(user.id, userId));
+      }
+    }
 
     console.log(`✅ Subscription payment processed for user ${userId}`);
   }

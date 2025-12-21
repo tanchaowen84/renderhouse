@@ -1,6 +1,6 @@
 'use server';
 
-import { project } from '@/db/schema';
+import { project, user } from '@/db/schema';
 import { LocaleLink } from '@/i18n/navigation';
 import { getSession } from '@/lib/server';
 import { UserButton } from '@/components/layout/user-button';
@@ -12,6 +12,7 @@ import { notFound } from 'next/navigation';
 import { getDb } from '@/db';
 import { ArrowLeftIcon } from 'lucide-react';
 import { WorkspaceClient } from './workspace-client';
+import { CreditsBadge } from '@/components/workspace/credits-badge';
 
 interface PageProps {
   params: Promise<{ locale: Locale; projectId: string }>;
@@ -34,6 +35,14 @@ export default async function WorkspacePage({ params }: PageProps) {
   if (!record || record.userId !== session.user.id) {
     notFound();
   }
+
+  const userRecord = await db
+    .select({ credits: user.credits })
+    .from(user)
+    .where(eq(user.id, session.user.id))
+    .limit(1)
+    .then((rows) => rows[0]);
+  const creditsUnits = userRecord?.credits ?? session.user.credits ?? 0;
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#f5f6f7] text-[#1f242c]">
@@ -63,13 +72,7 @@ export default async function WorkspacePage({ params }: PageProps) {
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white/90 px-3.5 py-1.5 text-xs font-medium text-[#1f4b3e] shadow-[0_8px_18px_rgba(0,0,0,0.05)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6bb4a0] opacity-60"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#6bb4a0]"></span>
-            </span>
-            <span>Free plan · 2 credits left</span>
-          </div>
+          <CreditsBadge initialCreditsUnits={creditsUnits} />
           <div className="rounded-full border border-[#d9dde1] bg-white p-0.5 shadow-[0_8px_18px_rgba(0,0,0,0.05)]">
             <UserButton user={session.user} />
           </div>
@@ -82,6 +85,7 @@ export default async function WorkspacePage({ params }: PageProps) {
         {/* Client Component for Interactive Sidebar & Canvas */}
         <WorkspaceClient 
           initialRecord={record}
+          initialCreditsUnits={creditsUnits}
           messages={{
             actions: {
               title: t('Workspace.actions.title'),

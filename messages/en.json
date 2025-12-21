@@ -47,6 +47,8 @@
       "getLifetimeAccess": "Get Lifetime Access",
       "getStarted": "Get Started",
       "notAvailable": "Not Available",
+      "subscribeToUnlockPacks": "Subscribe to unlock credit packs",
+      "billedYearly": "Billed yearly",
       "daysTrial": "{days}-day free trial"
     },
     "CheckoutButton": {
@@ -57,79 +59,78 @@
   "PricePlans": {
     "free": {
       "name": "Free",
-      "description": "Start exploring AI-powered flowchart generation — for free, forever.",
+      "description": "Get started with a few renders each month.",
       "features": {
-        "feature-1": "1 AI request per day",
-        "feature-2": "AI-assisted generation and editing",
-        "feature-3": "Unlimited diagram storage",
-        "feature-4": "Text and image input supported",
-        "feature-5": "Community support"
+        "feature-1": "3 credits per month",
+        "feature-2": "AI rendering and edits",
+        "feature-3": "Basic chat assistance",
+        "feature-4": "Standard processing"
       },
       "limits": {
-        "limit-1": "1 AI request per day",
-        "limit-2": "No technical support",
-        "limit-3": "Standard processing speed"
+        "limit-1": "Non-commercial use",
+        "limit-2": "Limited monthly credits",
+        "limit-3": "No priority processing"
       }
     },
-    "hobby": {
-      "name": "Hobby",
-      "description": "Great for individuals who need more AI requests and light technical assistance.",
+    "starter": {
+      "name": "Starter",
+      "description": "For regular projects and faster turnaround.",
       "features": {
-        "feature-1": "500 AI requests per month",
-        "feature-2": "Full access to AI agent for generation and editing",
-        "feature-3": "Unlimited diagram storage",
-        "feature-4": "Text and image input supported",
-        "feature-5": "Email support (24–48h response, max 7 days)",
-        "feature-6": "All generated content belongs to the user"
+        "feature-1": "60 credits per month",
+        "feature-2": "AI rendering and edits",
+        "feature-3": "Commercial use allowed"
       },
       "limits": {
-        "limit-1": "No priority support",
-        "limit-2": "Standard processing speed"
-      }
-    },
-    "professional": {
-      "name": "Professional",
-      "description": "Perfect for power users and professionals who want faster response and priority support.",
-      "features": {
-        "feature-1": "1000 AI requests per month",
-        "feature-2": "Priority AI processing",
-        "feature-3": "Unlimited diagram storage",
-        "feature-4": "Real-time AI-assisted editing",
-        "feature-5": "Email & technical support (under 24h, max 48h)",
-        "feature-6": "Text and image input supported",
-        "feature-7": "All generated content belongs to the user"
-      },
-      "limits": {
-        "limit-1": "For advanced or customized service needs, please contact our team directly",
-        "limit-2": "Does not include API access or enterprise features"
+        "limit-1": "Credits reset monthly"
       }
     },
     "pro": {
       "name": "Pro",
-      "description": "Advanced features for professional users and teams.",
+      "description": "Best for frequent rendering and faster results.",
       "features": {
-        "feature-1": "Unlimited AI requests",
-        "feature-2": "Priority processing and support",
-        "feature-3": "Advanced collaboration tools",
-        "feature-4": "Custom integrations",
-        "feature-5": "Enterprise-grade security"
+        "feature-1": "200 credits per month",
+        "feature-2": "AI rendering and edits",
+        "feature-3": "Faster processing",
+        "feature-4": "Commercial use allowed"
       },
       "limits": {
-        "limit-1": "Advanced features require technical setup",
-        "limit-2": "Enterprise support available separately"
+        "limit-1": "Credits reset monthly"
       }
     },
-    "lifetime": {
-      "name": "Lifetime",
-      "description": "One-time payment for lifetime access to all premium features.",
+    "studio": {
+      "name": "Studio",
+      "description": "High-volume rendering with commercial use.",
       "features": {
-        "feature-1": "Lifetime access to all features",
-        "feature-2": "Unlimited AI requests forever",
-        "feature-3": "Priority support for life",
-        "feature-4": "All future updates included",
-        "feature-5": "Advanced collaboration tools",
-        "feature-6": "Custom integrations",
-        "feature-7": "Enterprise-grade security"
+        "feature-1": "700 credits per month",
+        "feature-2": "Fastest processing",
+        "feature-3": "Commercial license"
+      },
+      "limits": {
+        "limit-1": "Monthly credits reset"
+      }
+    },
+    "pack60": {
+      "name": "Credit Pack 60",
+      "description": "One-time credits that never expire.",
+      "features": {
+        "feature-1": "60 credits (one-time)",
+        "feature-2": "Never expire"
+      }
+    },
+    "pack200": {
+      "name": "Credit Pack 200",
+      "description": "One-time credits that never expire.",
+      "features": {
+        "feature-1": "200 credits (one-time)",
+        "feature-2": "Never expire"
+      }
+    },
+    "pack700": {
+      "name": "Credit Pack 700",
+      "description": "One-time credits that never expire.",
+      "features": {
+        "feature-1": "700 credits (one-time)",
+        "feature-2": "Never expire"
       }
     }
   },

@@ -4,7 +4,7 @@ import { LocaleLink } from '@/i18n/navigation';
 import { getSession } from '@/lib/server';
 import { Routes } from '@/routes';
 import { desc, eq } from 'drizzle-orm';
-import { ArrowRight, Layers } from 'lucide-react';
+import { ArrowRight, Layers, UploadCloud } from 'lucide-react';
 import { ProjectDeleteButton } from '@/components/dashboard/project-delete-button';
 import { CreateProjectCard } from '@/components/dashboard/create-project-card';
 import type { Locale } from 'next-intl';

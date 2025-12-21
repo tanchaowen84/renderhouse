@@ -34,6 +34,74 @@ type DbTransaction = Parameters<Parameters<PostgresJsDatabase<typeof schema>['tr
 type UserRecord = typeof user.$inferSelect;
 type PaymentRecord = typeof payment.$inferSelect;
 type CreditsHistoryRecord = typeof creditsHistory.$inferSelect;
+type CreditBalances = {
+  pack: number;
+  monthly: number;
+  monthlyKey?: string;
+  monthlySource?: 'free' | 'subscription';
+};
+
+type CreditBalanceOptions = {
+  monthlyKey?: string;
+  monthlySource?: 'free' | 'subscription';
+};
+
+function normalizeCreditValue(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(value));
+}
+
+function readCreditBalances(
+  creditsValue: number | null | undefined,
+  metadata: Record<string, any>
+): CreditBalances {
+  const stored = metadata?.creditBalances;
+  if (stored && typeof stored === 'object') {
+    return {
+      pack: normalizeCreditValue(stored.pack),
+      monthly: normalizeCreditValue(stored.monthly),
+      monthlyKey:
+        typeof stored.monthlyKey === 'string' ? stored.monthlyKey : undefined,
+      monthlySource:
+        stored.monthlySource === 'free' || stored.monthlySource === 'subscription'
+          ? stored.monthlySource
+          : undefined,
+    };
+  }
+
+  const legacyFreeMonth =
+    typeof metadata?.freeCreditsMonth === 'string'
+      ? metadata.freeCreditsMonth
+      : undefined;
+
+  return {
+    pack: normalizeCreditValue(creditsValue ?? 0),
+    monthly: 0,
+    monthlyKey: legacyFreeMonth,
+    monthlySource: legacyFreeMonth ? 'free' : undefined,
+  };
+}
+
+function writeCreditBalances(
+  metadata: Record<string, any>,
+  balances: CreditBalances
+): Record<string, any> {
+  return {
+    ...metadata,
+    creditBalances: {
+      pack: normalizeCreditValue(balances.pack),
+      monthly: normalizeCreditValue(balances.monthly),
+      ...(balances.monthlyKey ? { monthlyKey: balances.monthlyKey } : {}),
+      ...(balances.monthlySource ? { monthlySource: balances.monthlySource } : {}),
+    },
+  };
+}
+
+function totalCreditsFromBalances(balances: CreditBalances): number {
+  return normalizeCreditValue(balances.pack) + normalizeCreditValue(balances.monthly);
+}
 
 /**
  * Custom error classes for better error handling
@@ -637,7 +705,8 @@ export async function addCreditsToUser(
   userId: string,
   creditsAmount: number,
   creemOrderId?: string,
-  description?: string
+  description?: string,
+  options?: { bucket?: 'pack' | 'monthly' } & CreditBalanceOptions
 ): Promise<number> {
   try {
     // Validate input
@@ -659,7 +728,8 @@ export async function addCreditsToUser(
     const userRecord = await tx
       .select({ 
         id: user.id, 
-        credits: user.credits 
+        credits: user.credits,
+        metadata: user.metadata,
       })
       .from(user)
       .where(eq(user.id, userId))
@@ -670,13 +740,31 @@ export async function addCreditsToUser(
     }
 
     const currentCredits = userRecord[0].credits || 0;
-    const newCredits = currentCredits + creditsAmount;
+    const metadata = (userRecord[0].metadata ?? {}) as Record<string, any>;
+    const balances = readCreditBalances(currentCredits, metadata);
+    const bucket = options?.bucket ?? 'pack';
+
+    if (bucket === 'monthly') {
+      balances.monthly = balances.monthly + creditsAmount;
+      if (options?.monthlyKey) {
+        balances.monthlyKey = options.monthlyKey;
+      }
+      if (options?.monthlySource) {
+        balances.monthlySource = options.monthlySource;
+      }
+    } else {
+      balances.pack = balances.pack + creditsAmount;
+    }
+
+    const newCredits = totalCreditsFromBalances(balances);
+    const updatedMetadata = writeCreditBalances(metadata, balances);
 
     // Update user credits
     const updateResult = await tx
       .update(user)
       .set({ 
         credits: newCredits,
+        metadata: updatedMetadata,
         updatedAt: new Date()
       } as any)
       .where(eq(user.id, userId))
@@ -716,6 +804,122 @@ export async function addCreditsToUser(
     throw new CreemOperationError(
       'Failed to add credits to user',
       'addCreditsToUser',
+      error
+    );
+  }
+}
+
+/**
+ * Sets the monthly credits bucket for a user (overwrites previous monthly balance).
+ *
+ * @param tx - Database transaction instance
+ * @param userId - User ID to update
+ * @param monthlyCredits - New monthly credits balance (can be 0)
+ * @param options - Optional metadata for the monthly bucket
+ * @returns Promise<number> - New total credits balance
+ */
+export async function setMonthlyCreditsForUser(
+  tx: DbTransaction,
+  userId: string,
+  monthlyCredits: number,
+  options?: CreditBalanceOptions & {
+    description?: string;
+    creemOrderId?: string;
+  }
+): Promise<number> {
+  try {
+    if (!userId) {
+      throw new CreemOperationError(
+        'User ID is required',
+        'input_validation'
+      );
+    }
+
+    if (!Number.isInteger(monthlyCredits) || monthlyCredits < 0) {
+      throw new CreemOperationError(
+        `Invalid monthly credits amount: ${monthlyCredits}. Must be a non-negative integer.`,
+        'input_validation'
+      );
+    }
+
+    const userRecord = await tx
+      .select({
+        id: user.id,
+        credits: user.credits,
+        metadata: user.metadata,
+      })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    if (userRecord.length === 0) {
+      throw new UserNotFoundError(userId);
+    }
+
+    const currentCredits = userRecord[0].credits || 0;
+    const metadata = (userRecord[0].metadata ?? {}) as Record<string, any>;
+    const balances = readCreditBalances(currentCredits, metadata);
+    const previousMonthly = balances.monthly;
+
+    balances.monthly = monthlyCredits;
+    if (options?.monthlyKey) {
+      balances.monthlyKey = options.monthlyKey;
+    }
+    if (options?.monthlySource) {
+      balances.monthlySource = options.monthlySource;
+    }
+
+    const newCredits = totalCreditsFromBalances(balances);
+    const updatedMetadata = writeCreditBalances(metadata, balances);
+
+    const updateResult = await tx
+      .update(user)
+      .set({
+        credits: newCredits,
+        metadata: updatedMetadata,
+        updatedAt: new Date(),
+      } as any)
+      .where(eq(user.id, userId))
+      .returning({ credits: user.credits });
+
+    if (updateResult.length === 0) {
+      throw new CreemOperationError(
+        'Failed to update user credits: no rows affected',
+        'credits_update'
+      );
+    }
+
+    const delta = monthlyCredits - previousMonthly;
+    if (delta !== 0) {
+      const historyData = {
+        id: `credits_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        userId: userId,
+        amount: Math.abs(delta),
+        type: delta > 0 ? ('add' as const) : ('subtract' as const),
+        description:
+          options?.description ||
+          `Monthly credits set to ${monthlyCredits}`,
+        creemOrderId: options?.creemOrderId,
+        createdAt: new Date(),
+        metadata: {},
+      };
+
+      await tx.insert(creditsHistory).values(historyData);
+    }
+
+    console.log(
+      `✅ Set monthly credits for user ${userId}. New balance: ${newCredits}`
+    );
+
+    return newCredits;
+  } catch (error) {
+    if (error instanceof CreemOperationError) {
+      throw error;
+    }
+
+    throw new CreemOperationError(
+      'Failed to set monthly credits',
+      'setMonthlyCreditsForUser',
       error
     );
   }
@@ -863,7 +1067,8 @@ export async function useUserCredits(
     const userRecord = await tx
       .select({ 
         id: user.id, 
-        credits: user.credits 
+        credits: user.credits,
+        metadata: user.metadata,
       })
       .from(user)
       .where(eq(user.id, userId))
@@ -874,19 +1079,33 @@ export async function useUserCredits(
     }
 
     const currentCredits = userRecord[0].credits || 0;
+    const metadata = (userRecord[0].metadata ?? {}) as Record<string, any>;
+    const balances = readCreditBalances(currentCredits, metadata);
+    const availableCredits = totalCreditsFromBalances(balances);
 
     // Check if user has enough credits
-    if (currentCredits < creditsAmount) {
-      throw new InsufficientCreditsError(creditsAmount, currentCredits);
+    if (availableCredits < creditsAmount) {
+      throw new InsufficientCreditsError(creditsAmount, availableCredits);
     }
 
-    const newCredits = currentCredits - creditsAmount;
+    let remaining = creditsAmount;
+    const monthlySpend = Math.min(balances.monthly, remaining);
+    balances.monthly = balances.monthly - monthlySpend;
+    remaining -= monthlySpend;
+
+    if (remaining > 0) {
+      balances.pack = balances.pack - remaining;
+    }
+
+    const newCredits = totalCreditsFromBalances(balances);
+    const updatedMetadata = writeCreditBalances(metadata, balances);
 
     // Update user credits
     const updateResult = await tx
       .update(user)
       .set({ 
         credits: newCredits,
+        metadata: updatedMetadata,
         updatedAt: new Date()
       } as any)
       .where(eq(user.id, userId))
@@ -952,7 +1171,7 @@ export async function getUserCredits(
     const db = await getDb();
     
     const userRecord = await db
-      .select({ credits: user.credits })
+      .select({ credits: user.credits, metadata: user.metadata })
       .from(user)
       .where(eq(user.id, userId))
       .limit(1);
@@ -961,7 +1180,9 @@ export async function getUserCredits(
       throw new UserNotFoundError(userId);
     }
 
-    return userRecord[0].credits || 0;
+    const metadata = (userRecord[0].metadata ?? {}) as Record<string, any>;
+    const balances = readCreditBalances(userRecord[0].credits || 0, metadata);
+    return totalCreditsFromBalances(balances);
 
   } catch (error) {
     if (error instanceof CreemOperationError) {

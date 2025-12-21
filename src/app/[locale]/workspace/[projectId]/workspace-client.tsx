@@ -1,6 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { formatCredits } from '@/lib/credits';
+import { useCreditsStore } from '@/stores/credits-store';
 import {
   ArrowUpIcon,
   DownloadIcon,
@@ -14,13 +16,24 @@ import {
   ZoomOutIcon,
 } from 'lucide-react';
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface WorkspaceClientProps {
   initialRecord: any;
+  initialCreditsUnits: number;
   messages: {
     actions: {
       title: string;
@@ -60,6 +73,15 @@ interface ChatMessage {
   status?: ChatMessageStatus;
   imageUrl?: string;
   renderSpec?: RenderSpec;
+}
+
+interface ChatResponseBody {
+  reply?: string;
+  imageUrl?: string;
+  renderSpec?: RenderSpec;
+  error?: string;
+  code?: string;
+  credits?: number;
 }
 
 type RenderStyle =
@@ -134,8 +156,13 @@ function getFirstOutputUrl(record: any): string | null {
 
 export function WorkspaceClient({
   initialRecord,
+  initialCreditsUnits,
   messages,
 }: WorkspaceClientProps) {
+  const router = useRouter();
+  const locale = useLocale();
+  const creditsUnits = useCreditsStore((state) => state.creditsUnits);
+  const setCreditsUnits = useCreditsStore((state) => state.setCreditsUnits);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(() =>
     getPrimaryImageUrl(initialRecord)
   );
@@ -158,6 +185,7 @@ export function WorkspaceClient({
   const [renderCamera, setRenderCamera] =
     useState<RenderCamera>('Maintain angle');
   const [renderDetails, setRenderDetails] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -167,6 +195,10 @@ export function WorkspaceClient({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
+
+  useEffect(() => {
+    setCreditsUnits(initialCreditsUnits ?? 0);
+  }, [initialCreditsUnits, setCreditsUnits]);
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -207,16 +239,16 @@ export function WorkspaceClient({
         }),
       });
 
-      const data = (await response.json().catch(() => null)) as
-        | {
-            reply?: string;
-            imageUrl?: string;
-            renderSpec?: RenderSpec;
-            error?: string;
-          }
-        | null;
+      const data = (await response.json().catch(() => null)) as ChatResponseBody | null;
+
+      if (data?.credits !== undefined && Number.isFinite(data.credits)) {
+        setCreditsUnits(Math.max(0, Math.round(data.credits)));
+      }
 
       if (!response.ok || !data?.reply) {
+        if (data?.code === 'INSUFFICIENT_CREDITS') {
+          setShowPaywall(true);
+        }
         const errorMessage = data?.error || 'Failed to generate render';
         setChatMessages((prev) =>
           prev.map((m) =>
@@ -683,6 +715,34 @@ export function WorkspaceClient({
           )}
         </div>
       </div>
+
+      <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Upgrade to keep rendering</DialogTitle>
+            <DialogDescription>
+              Your balance is {formatCredits(creditsUnits)} credits. Upgrade to
+              unlock more renders.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setShowPaywall(false)}
+              className="rounded-full border border-[#d9dde1] bg-white px-4 py-2 text-xs font-semibold text-[#4c525c] hover:bg-[#f3f5f8]"
+            >
+              Not now
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/${locale}/pricing`)}
+              className="rounded-full border border-[#1f4b3e] bg-[#1f4b3e] px-4 py-2 text-xs font-semibold text-white hover:brightness-[1.05]"
+            >
+              View plans
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Zoomable Canvas */}
       <div className="absolute inset-0 z-0 h-full w-full">

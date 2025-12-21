@@ -32,6 +32,7 @@ interface PricingCardProps {
   metadata?: Record<string, string>;
   className?: string;
   isCurrentPlan?: boolean;
+  canPurchasePacks?: boolean;
 }
 
 /**
@@ -74,6 +75,7 @@ export function PricingCard({
   metadata,
   className,
   isCurrentPlan = false,
+  canPurchasePacks = false,
 }: PricingCardProps) {
   const t = useTranslations('PricingPage.PricingCard');
   const price = getPriceForPlan(plan, interval, paymentType);
@@ -84,15 +86,26 @@ export function PricingCard({
   // generate formatted price and price label
   let formattedPrice = '';
   let priceLabel = '';
+  let billingNote = '';
   if (plan.isFree) {
     formattedPrice = t('freePrice');
   } else if (price && price.amount > 0) {
     // price is available
-    formattedPrice = formatPrice(price.amount, price.currency);
-    if (interval === PlanIntervals.MONTH) {
-      priceLabel = t('perMonth');
-    } else if (interval === PlanIntervals.YEAR) {
-      priceLabel = t('perYear');
+    if (price.type === PaymentTypes.SUBSCRIPTION) {
+      if (interval === PlanIntervals.YEAR) {
+        const monthlyAmount = Math.round(price.amount / 12);
+        formattedPrice = formatPrice(monthlyAmount, price.currency);
+        priceLabel = t('perMonth');
+        billingNote = t('billedYearly');
+      } else {
+        formattedPrice = formatPrice(price.amount, price.currency);
+        priceLabel = t('perMonth');
+      }
+    } else {
+      formattedPrice = formatPrice(price.amount, price.currency);
+      if (plan.credits) {
+        priceLabel = `/ ${plan.credits} credits`;
+      }
     }
   } else {
     formattedPrice = t('notAvailable');
@@ -100,8 +113,19 @@ export function PricingCard({
 
   // check if plan is not free and has a price
   const isPaidPlan = !plan.isFree && !!price;
+  const isCreditPack = price?.type === PaymentTypes.ONE_TIME;
+  const packLocked = isCreditPack && !canPurchasePacks;
   // check if plan has a trial period, period is greater than 0
   const hasTrialPeriod = price?.trialPeriodDays && price.trialPeriodDays > 0;
+  const checkoutMetadata =
+    price && !plan.isFree
+      ? {
+          ...(metadata ?? {}),
+          productType:
+            price.type === PaymentTypes.ONE_TIME ? 'credits' : 'subscription',
+          ...(plan.credits ? { credits: String(plan.credits) } : {}),
+        }
+      : metadata;
 
   return (
     <Card
@@ -145,6 +169,9 @@ export function PricingCard({
           </span>
           {priceLabel && <span className="text-2xl">{priceLabel}</span>}
         </div>
+        {billingNote && (
+          <div className="text-xs text-muted-foreground">{billingNote}</div>
+        )}
 
         <CardDescription>
           <p className="text-sm">{plan.description}</p>
@@ -172,12 +199,17 @@ export function PricingCard({
             {t('yourCurrentPlan')}
           </Button>
         ) : isPaidPlan ? (
+          packLocked ? (
+            <Button disabled className="mt-4 w-full">
+              {t('subscribeToUnlockPacks')}
+            </Button>
+          ) : (
           currentUser ? (
             <CheckoutButton
               userId={currentUser.id}
               planId={plan.id}
               priceId={price.priceId}
-              metadata={metadata}
+              metadata={checkoutMetadata}
               className="mt-4 w-full cursor-pointer"
             >
               {plan.isLifetime ? t('getLifetimeAccess') : t('getStarted')}
@@ -188,6 +220,7 @@ export function PricingCard({
                 {t('getStarted')}
               </Button>
             </LoginWrapper>
+          )
           )
         ) : (
           <Button disabled className="mt-4 w-full">

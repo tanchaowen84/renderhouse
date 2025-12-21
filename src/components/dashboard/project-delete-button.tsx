@@ -67,6 +67,10 @@ export function ProjectDeleteButton({
       <button
         type="button"
         onClick={handleOpen}
+        onPointerDown={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
         className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#d9dde1] bg-white/90 text-[#8b929b] shadow-[0_6px_14px_rgba(0,0,0,0.08)] transition hover:text-[#1f242c]"
         aria-label="Delete project"
         title="Delete project"

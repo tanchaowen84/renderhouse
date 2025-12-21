@@ -66,6 +66,7 @@ export interface PricePlan {
   description?: string;              // Description of the plan features
   features?: string[];               // List of features included in this plan
   limits?: string[];                 // List of limits for this plan
+  credits?: number;                  // Credits included with this plan (if applicable)
   prices: Price[];                   // Available prices for this plan
   isFree: boolean;                   // Whether this is a free plan
   isLifetime: boolean;               // Whether this is a lifetime plan
@@ -296,4 +297,3 @@ export interface CreditTransaction {
   created_at: string;
   metadata?: Record<string, any>;
 }
-

@@ -41,6 +41,20 @@ export function getPricePlans(): Record<string, PricePlan> {
     };
   }
 
+  if (priceConfig.plans.starter) {
+    plans.starter = {
+      ...priceConfig.plans.starter,
+      name: t('starter.name'),
+      description: t('starter.description'),
+      features: [
+        t('starter.features.feature-1'),
+        t('starter.features.feature-2'),
+        t('starter.features.feature-3'),
+      ],
+      limits: [t('starter.limits.limit-1')],
+    };
+  }
+
   if (priceConfig.plans.pro) {
     plans.pro = {
       ...priceConfig.plans.pro,
@@ -51,25 +65,59 @@ export function getPricePlans(): Record<string, PricePlan> {
         t('pro.features.feature-2'),
         t('pro.features.feature-3'),
         t('pro.features.feature-4'),
-        t('pro.features.feature-5'),
       ],
-      limits: [t('pro.limits.limit-1'), t('pro.limits.limit-2')],
+      limits: [t('pro.limits.limit-1')],
     };
   }
 
-  if (priceConfig.plans.lifetime) {
-    plans.lifetime = {
-      ...priceConfig.plans.lifetime,
-      name: t('lifetime.name'),
-      description: t('lifetime.description'),
+  if (priceConfig.plans.studio) {
+    plans.studio = {
+      ...priceConfig.plans.studio,
+      name: t('studio.name'),
+      description: t('studio.description'),
       features: [
-        t('lifetime.features.feature-1'),
-        t('lifetime.features.feature-2'),
-        t('lifetime.features.feature-3'),
-        t('lifetime.features.feature-4'),
-        t('lifetime.features.feature-5'),
-        t('lifetime.features.feature-6'),
-        t('lifetime.features.feature-7'),
+        t('studio.features.feature-1'),
+        t('studio.features.feature-2'),
+        t('studio.features.feature-3'),
+      ],
+      limits: [],
+    };
+  }
+
+  if (priceConfig.plans.pack60) {
+    plans.pack60 = {
+      ...priceConfig.plans.pack60,
+      name: t('pack60.name'),
+      description: t('pack60.description'),
+      features: [
+        t('pack60.features.feature-1'),
+        t('pack60.features.feature-2'),
+      ],
+      limits: [],
+    };
+  }
+
+  if (priceConfig.plans.pack200) {
+    plans.pack200 = {
+      ...priceConfig.plans.pack200,
+      name: t('pack200.name'),
+      description: t('pack200.description'),
+      features: [
+        t('pack200.features.feature-1'),
+        t('pack200.features.feature-2'),
+      ],
+      limits: [],
+    };
+  }
+
+  if (priceConfig.plans.pack700) {
+    plans.pack700 = {
+      ...priceConfig.plans.pack700,
+      name: t('pack700.name'),
+      description: t('pack700.description'),
+      features: [
+        t('pack700.features.feature-1'),
+        t('pack700.features.feature-2'),
       ],
       limits: [],
     };
