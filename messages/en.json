@@ -617,7 +617,10 @@
       "uploadButton": "Upload & render",
       "optionalSettings": "Style & lighting (optional)",
       "style": "Style",
-      "lighting": "Lighting"
+      "lighting": "Lighting",
+      "continueTitle": "Sign in to continue",
+      "continueDescription": "We saved your upload. Sign in to keep working from where you left off.",
+      "continueNote": "Your file is securely stored and will appear in your workspace after login."
     },
     "logocloud": {
       "title": "Your favorite companies are our partners"

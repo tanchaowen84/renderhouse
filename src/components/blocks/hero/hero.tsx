@@ -1,22 +1,122 @@
 'use client';
 
 import { createProjectAction } from '@/actions/create-project';
+import { SocialLoginButton } from '@/components/auth/social-login-button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { authClient } from '@/lib/auth-client';
 import { uploadFileFromBrowser } from '@/storage';
 import { CloudUpload, Sparkles, UploadCloud } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+
+const PENDING_UPLOAD_KEY = 'renderhouse:pendingUpload';
+
+type PendingUpload = {
+  inputUrl: string;
+  title: string;
+  createdAt: string;
+};
 
 export default function HeroSection() {
   const t = useTranslations('HomePage.hero');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const { data: session } = authClient.useSession();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
 
   const handleUploadClick = () => fileInputRef.current?.click();
+
+  const savePendingUpload = (data: PendingUpload) => {
+    try {
+      localStorage.setItem(PENDING_UPLOAD_KEY, JSON.stringify(data));
+    } catch {
+      // ignore storage failures
+    }
+  };
+
+  const readPendingUpload = (): PendingUpload | null => {
+    try {
+      const raw = localStorage.getItem(PENDING_UPLOAD_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as PendingUpload;
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingUpload = () => {
+    try {
+      localStorage.removeItem(PENDING_UPLOAD_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (!session?.user || isResuming) return;
+    const pending = readPendingUpload();
+    if (!pending) return;
+
+    setIsResuming(true);
+    (async () => {
+      try {
+        const result: any = await createProjectAction({
+          inputUrl: pending.inputUrl,
+          title: pending.title,
+        });
+
+        if (result?.serverError) {
+          toast.error(result.serverError);
+          clearPendingUpload();
+          return;
+        }
+
+        if (result?.validationErrors) {
+          const first = Object.values(result.validationErrors)[0] as
+            | string[]
+            | undefined;
+          toast.error(first?.[0] ?? 'Invalid input');
+          clearPendingUpload();
+          return;
+        }
+
+        if (result?.error) {
+          toast.error(result.error);
+          clearPendingUpload();
+          return;
+        }
+
+        const projectId = result?.data?.projectId ?? result?.projectId;
+        if (!projectId) {
+          toast.error('Create project failed');
+          clearPendingUpload();
+          return;
+        }
+
+        clearPendingUpload();
+        setShowLoginPrompt(false);
+        router.push(`/${locale}/workspace/${projectId}`);
+      } catch (err) {
+        console.error(err);
+        toast.error('Project creation failed');
+        clearPendingUpload();
+      } finally {
+        setIsResuming(false);
+      }
+    })();
+  }, [session?.user, isResuming, locale, router]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,6 +136,17 @@ export default function HeroSection() {
       const upload = await uploadFileFromBrowser(file);
       if (!upload?.url) throw new Error('Upload failed');
 
+      if (!session?.user) {
+        const pendingUpload = {
+          inputUrl: upload.url,
+          title: file.name,
+          createdAt: new Date().toISOString(),
+        };
+        savePendingUpload(pendingUpload);
+        setShowLoginPrompt(true);
+        return;
+      }
+
       const result: any = await createProjectAction({
         inputUrl: upload.url,
         title: file.name,
@@ -54,9 +165,8 @@ export default function HeroSection() {
         return;
       }
 
-      if (result?.error === 'Unauthorized') {
-        const cb = encodeURIComponent(pathname || '/');
-        router.push(`/${locale}/auth/login?callbackUrl=${cb}`);
+      if (result?.error) {
+        toast.error(result?.error ?? 'Create project failed');
         return;
       }
 
@@ -177,6 +287,21 @@ export default function HeroSection() {
           </div>
         </div>
       </section>
+
+      <Dialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>{t('continueTitle')}</DialogTitle>
+            <DialogDescription>{t('continueDescription')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-[#6a707a]">
+            <p>{t('continueNote')}</p>
+          </div>
+          <div className="pt-2">
+            <SocialLoginButton callbackUrl={pathname || '/'} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
