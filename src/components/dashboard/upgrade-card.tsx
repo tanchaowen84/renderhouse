@@ -53,7 +53,7 @@ export function UpgradeCard() {
           size="sm"
           asChild
         >
-          <LocaleLink href={Routes.SettingsBilling}>{t('button')}</LocaleLink>
+          <LocaleLink href={Routes.Pricing}>{t('button')}</LocaleLink>
         </Button>
       </CardContent>
     </Card>
