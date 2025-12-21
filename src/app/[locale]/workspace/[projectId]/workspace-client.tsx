@@ -3,9 +3,11 @@
 import { cn } from '@/lib/utils';
 import {
   ArrowUpIcon,
+  DownloadIcon,
   Loader2Icon,
   MaximizeIcon,
   MessageCircleIcon,
+  Share2Icon,
   SparklesIcon,
   UploadIcon,
   ZoomInIcon,
@@ -15,6 +17,7 @@ import Image from 'next/image';
 import { type FormEvent, useEffect, useRef, useState } from 'react';
 import type { ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
+import { toast } from 'sonner';
 
 interface WorkspaceClientProps {
   initialRecord: any;
@@ -297,6 +300,64 @@ export function WorkspaceClient({
       : mode === 'render'
         ? 'Render settings'
         : 'Choose mode';
+
+  const handleDownload = async () => {
+    if (!currentImageUrl) return;
+    const filenameBase = (initialRecord?.title || 'render')
+      .toString()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]/g, '')
+      .toLowerCase();
+    const filename = filenameBase ? `${filenameBase}.png` : 'render.png';
+    try {
+      const response = await fetch(
+        `/api/download?url=${encodeURIComponent(currentImageUrl)}&filename=${encodeURIComponent(filename)}`
+      );
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      toast.error('Download failed');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!currentImageUrl) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: initialRecord?.title || 'Render',
+          url: currentImageUrl,
+        });
+        return;
+      }
+    } catch (error) {
+      // fall through to clipboard
+    }
+
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(currentImageUrl);
+        toast.success('Link copied');
+        return;
+      } catch (error) {
+        // ignore
+      }
+    }
+
+    toast.error('Unable to share this image.');
+  };
 
   return (
     <>
@@ -636,6 +697,39 @@ export function WorkspaceClient({
         >
           {({ zoomIn, zoomOut, resetTransform }) => (
             <>
+              {/* Floating Actions */}
+              <div className="absolute right-8 top-8 z-40 flex items-center gap-2 rounded-full border border-[#d9dde1] bg-white/92 px-2 py-1.5 shadow-[0_14px_32px_rgba(0,0,0,0.08)] backdrop-blur pointer-events-auto">
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={!currentImageUrl}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition',
+                    currentImageUrl
+                      ? 'text-[#1f242c] hover:bg-[#f3f5f8]'
+                      : 'cursor-not-allowed text-[#9aa1aa]'
+                  )}
+                >
+                  <DownloadIcon className="size-3.5" />
+                  Download
+                </button>
+                <div className="h-4 w-px bg-[#e6e8ec]" />
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  disabled={!currentImageUrl}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition',
+                    currentImageUrl
+                      ? 'text-[#1f242c] hover:bg-[#f3f5f8]'
+                      : 'cursor-not-allowed text-[#9aa1aa]'
+                  )}
+                >
+                  <Share2Icon className="size-3.5" />
+                  Share
+                </button>
+              </div>
+
               {/* Floating Zoom Controls */}
               <div className="absolute bottom-8 right-8 z-40 flex flex-col gap-2 rounded-xl border border-[#d9dde1] bg-white/92 p-1.5 shadow-[0_14px_32px_rgba(0,0,0,0.08)] backdrop-blur pointer-events-auto">
                 <button
