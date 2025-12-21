@@ -3,9 +3,7 @@
 import Container from '@/components/layout/container';
 import { Logo } from '@/components/layout/logo';
 import { ModeSwitcherHorizontal } from '@/components/layout/mode-switcher-horizontal';
-import BuiltWithButton from '@/components/shared/built-with-button';
 import { getFooterLinks } from '@/config/footer-config';
-import { getSocialLinks } from '@/config/social-config';
 import { LocaleLink } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -15,7 +13,6 @@ import { ThemeSelector } from './theme-selector';
 export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
   const t = useTranslations();
   const footerLinks = getFooterLinks();
-  const socialLinks = getSocialLinks();
 
   return (
     <footer className={cn('border-t border-[#e6e8ec] bg-[#f5f6f7] text-[#4c525c]', className)}>
@@ -36,30 +33,7 @@ export function Footer({ className }: React.HTMLAttributes<HTMLElement>) {
                 {t('Marketing.footer.tagline')}
               </p>
 
-              {/* social links */}
-              <div className="flex items-center gap-4 py-2">
-                <div className="flex items-center gap-2">
-                  {socialLinks?.map((link) => (
-                    <a
-                      key={link.title}
-                      href={link.href || '#'}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={link.title}
-                      className="border border-[#e6e8ec] inline-flex h-8 w-8 items-center 
-                          justify-center rounded-full hover:bg-white hover:text-[#1f242c] transition-colors text-[#6a707a]"
-                    >
-                      <span className="sr-only">{link.title}</span>
-                      {link.icon ? link.icon : null}
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* built with button */}
-              <div className="opacity-80 hover:opacity-100 transition-opacity">
-                <BuiltWithButton />
-              </div>
+              {/* social links removed */}
             </div>
           </div>
 

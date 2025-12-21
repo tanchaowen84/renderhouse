@@ -1,8 +1,8 @@
 {
   "Metadata": {
     "name": "Render House",
-    "title": "FlowChart AI – Smart AI Tool to Create Beautiful Flowcharts",
-    "description": "Design professional flowcharts faster with FlowChart AI. Draw, edit, and collaborate in real time using powerful AI tools—no design experience required."
+    "title": "Render House — Turn sketches into real renders fast",
+    "description": "Upload a sketch, floor plan, or photo and get a photorealistic exterior render in minutes. Choose style, lighting, and angle—no 3D skills needed."
   },
   "Common": {
     "login": "Log in",
@@ -344,7 +344,7 @@
       }
     },
     "footer": {
-      "tagline": "Create beautiful flowcharts with FlowChart AI - fast, intelligent, and effortless",
+      "tagline": "Turn sketches, plans, or photos into photorealistic exterior renders in minutes.",
       "product": {
         "title": "Product",
         "items": {
